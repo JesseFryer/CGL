@@ -58,5 +58,12 @@ int main() {
     printf("\nm1 x m2:\n");
     clm_mat4_print(m1);
 
+    printf("\nnot normlized:\n");
+    clmVec3 v = { 2.0f, 0.5f, 7.0f };
+    clm_v3_print(v);
+    clm_v3_normalize(v);
+    printf("\nnormlized:\n");
+    clm_v3_print(v);
+
     return 0;
 }

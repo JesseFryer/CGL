@@ -7,8 +7,8 @@
 #include "vertex.h"
 #include "clm.h"
 
-#define SCR_W 1280
-#define SCR_H 720
+#define SCR_W 1200
+#define SCR_H 1200
 
 void framebuffer_size_callback(
         GLFWwindow* window, 
@@ -111,8 +111,10 @@ int main() {
     glUseProgram(shader);
     vao_bind(&vao);
 
-    clmVec3 rotate = { 0.0f, 0.0f, 1.0f };
+    clmVec3 rotate = { 1.0f, 8.0f, 3.0f };
     clmVec3 translate = { 0.25f, 0.25f, 0.0f };
+    clmVec3 scale = { 0.25f, 0.25f, 0.25f };
+    clm_v3_normalize(rotate);
 
     while(!glfwWindowShouldClose(window)) {
         // Events.
@@ -121,6 +123,7 @@ int main() {
         // Test transform. rotate over time.
         clmMat4 trans;
         clm_mat4_identity(trans);
+        clm_mat4_scale(trans, scale);
         clm_mat4_rotate(trans, (float) glfwGetTime(), rotate);
         clm_mat4_translate(trans, translate);
 
@@ -128,7 +131,6 @@ int main() {
                 shader, "transform");
         glUniformMatrix4fv(transformLoc,
                 1, GL_FALSE, trans);
-
 
         // Draw.
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);

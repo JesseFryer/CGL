@@ -69,6 +69,11 @@ float clm_v3_length(clmVec3 v);
 void clm_v3_cross_product(clmVec3 v1, clmVec3 v2, 
         clmVec3 result);
 
+/* clm_v3_normalize
+ * ----------------
+ * Normalize vector v.
+ */
+void clm_v3_normalize(clmVec3 v);
 
 /* clm_mat4_mul
  * ------------
@@ -103,6 +108,12 @@ void clm_mat4_translate(clmMat4 trans,
  */
 void clm_mat4_rotate(clmMat4 trans,
         float rad, clmVec3 axis);
+
+/* clm_mat4_scale
+ * --------------
+ * Adds a scale transformation to trans.
+ */
+void clm_mat4_scale(clmMat4 trans, clmVec3 scale);
 
 /* clm_mat4_print
  * --------------

@@ -52,6 +52,13 @@ void clm_v3_cross_product(clmVec3 v1, clmVec3 v2,
     result[2] = (v1[0] * v2[1]) - (v1[1] * v2[0]);
 }
 
+void clm_v3_normalize(clmVec3 v) {
+    float len = clm_v3_length(v);
+    v[0] /= len;
+    v[1] /= len;
+    v[2] /= len;
+}
+
 void clm_mat4_multiply(clmMat4 mat1, clmMat4 mat2) {
     // Compute the matrix multiplication into tmp.
     clmMat4 tmp;
@@ -153,6 +160,17 @@ void clm_mat4_rotate(clmMat4 trans,
     };
 
     clm_mat4_multiply(trans, rotMat);
+}
+
+void clm_mat4_scale(clmMat4 trans, clmVec3 scale) {
+    clmMat4 scaleMat = {
+        scale[0], 0, 0, 0,
+        0, scale[1], 0, 0,
+        0, 0, scale[2], 0,
+        0, 0, 0, 1
+    };
+
+    clm_mat4_multiply(trans, scaleMat);
 }
 
 void clm_mat4_print(clmMat4 mat) {
