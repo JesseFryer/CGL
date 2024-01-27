@@ -1,3 +1,6 @@
+#ifndef VAO_H
+#define VAO_H
+
 #include <glad/glad.h>
 
 typedef struct VAO {
@@ -46,4 +49,4 @@ void vao_vertex_attrib(
         GLsizei stride,
         const GLvoid* ptr);
 
-
+#endif

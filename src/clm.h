@@ -6,6 +6,9 @@
  *
  */
 
+#ifndef CLM_H
+#define CLM_H
+
 typedef float clmVec2[2];
 typedef float clmVec3[3];
 typedef float clmVec4[4];
@@ -148,3 +151,5 @@ void clm_v3_print(clmVec3 v);
  * print v in a readable format.
  */
 void clm_v4_print(clmVec4 v);
+
+#endif

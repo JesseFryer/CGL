@@ -6,8 +6,9 @@
 #include "vao.h"
 #include "vertex.h"
 #include "clm.h"
+#include "camera.h"
 
-#define SCR_W 1200
+#define SCR_W 1600
 #define SCR_H 1200
 
 void framebuffer_size_callback(
@@ -119,7 +120,17 @@ int main() {
             0.1f,
             100.0f);
 
-    clmVec3 viewTrans = { 0.0f, 0.0f, -3.0f };
+    // View matrix.
+    Camera camera;
+    clmVec3 initCamPos = { 0.0f, 0.0f, -3.0f };
+    cam_init_camera(&camera,
+            45.0f,
+            (float) SCR_W / (float) SCR_H,
+            initCamPos,
+            0.001f);
+
+    clmMat4 view;
+    clmVec3 viewTrans = { 0.0f, 0.0f, 0.0f };
 
     // Model matrix.
     clmMat4 model;
@@ -128,7 +139,7 @@ int main() {
     clmVec3 rotate = { 1.0f, 8.0f, 3.0f };
     clm_v3_normalize(rotate);
 
-    float camSpeed = 0.001f;
+    float camSpeed = 0.002f;
 
     while(!glfwWindowShouldClose(window)) {
         // Events.
@@ -143,38 +154,41 @@ int main() {
         clm_mat4_translate(model, translate);
 
         // View matrix. 
-        clmMat4 view;
-        clm_mat4_identity(view);
-
+        viewTrans[0] = 0.0f;
+        viewTrans[1] = 0.0f;
+        viewTrans[2] = 0.0f;
         if (input_is_pressed(K_W)) {
-            viewTrans[2] += camSpeed;
+            viewTrans[2] += 1.0f;
         } 
         if (input_is_pressed(K_S)) {
-            viewTrans[2] -= camSpeed;
+            viewTrans[2] -= 1.0f;
         } 
         if (input_is_pressed(K_D)) {
-            viewTrans[0] -= camSpeed;
+            viewTrans[0] -= 1.0f;
         } 
         if (input_is_pressed(K_A)) {
-            viewTrans[0] += camSpeed;
+            viewTrans[0] += 1.0f;
         } 
         if (input_is_pressed(K_SPACE)) {
-            viewTrans[1] -= camSpeed;
+            viewTrans[1] -= 1.0f;
         } 
         if (input_is_pressed(K_LSHIFT)) {
-            viewTrans[1] += camSpeed;
+            viewTrans[1] += 1.0f;
         } 
 
-        clm_mat4_translate(view, viewTrans);
+        cam_move(&camera, viewTrans);
+        cam_view_matrix(&camera, view);
 
         unsigned int modelLoc = glGetUniformLocation(
                 shader, "model");
         glUniformMatrix4fv(modelLoc,
                 1, GL_FALSE, model);
+
         unsigned int viewLoc = glGetUniformLocation(
                 shader, "view");
         glUniformMatrix4fv(viewLoc,
                 1, GL_FALSE, view);
+
         unsigned int projLoc = glGetUniformLocation(
                 shader, "proj");
         glUniformMatrix4fv(projLoc,
