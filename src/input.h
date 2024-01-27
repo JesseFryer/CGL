@@ -9,7 +9,12 @@
 
 typedef int KeyCode;
 
-#define K_SPACE 32
+#define K_SPACE  GLFW_KEY_SPACE
+#define K_LSHIFT GLFW_KEY_LEFT_SHIFT
+#define K_W      GLFW_KEY_W
+#define K_A      GLFW_KEY_A
+#define K_S      GLFW_KEY_S
+#define K_D      GLFW_KEY_D
 
 /* input_set_window
  * ----------------

@@ -111,26 +111,74 @@ int main() {
     glUseProgram(shader);
     vao_bind(&vao);
 
-    clmVec3 rotate = { 1.0f, 8.0f, 3.0f };
+    // Projection matrix. (perspective)
+    clmMat4 proj;
+    clm_mat4_perspective(proj, 
+            45.0f,
+            (float) SCR_W / (float) SCR_H,
+            0.1f,
+            100.0f);
+
+    clmVec3 viewTrans = { 0.0f, 0.0f, -3.0f };
+
+    // Model matrix.
+    clmMat4 model;
     clmVec3 translate = { 0.25f, 0.25f, 0.0f };
     clmVec3 scale = { 0.25f, 0.25f, 0.25f };
+    clmVec3 rotate = { 1.0f, 8.0f, 3.0f };
     clm_v3_normalize(rotate);
+
+    float camSpeed = 0.001f;
 
     while(!glfwWindowShouldClose(window)) {
         // Events.
         glfwPollEvents();    
 
         // Test transform. rotate over time.
-        clmMat4 trans;
-        clm_mat4_identity(trans);
-        clm_mat4_scale(trans, scale);
-        clm_mat4_rotate(trans, (float) glfwGetTime(), rotate);
-        clm_mat4_translate(trans, translate);
+        clm_mat4_identity(model);
+        clm_mat4_scale(model, scale);
+        clm_mat4_rotate(model, 
+                5.0f * ((float) glfwGetTime()), 
+                rotate);
+        clm_mat4_translate(model, translate);
 
-        unsigned int transformLoc = glGetUniformLocation(
-                shader, "transform");
-        glUniformMatrix4fv(transformLoc,
-                1, GL_FALSE, trans);
+        // View matrix. 
+        clmMat4 view;
+        clm_mat4_identity(view);
+
+        if (input_is_pressed(K_W)) {
+            viewTrans[2] += camSpeed;
+        } 
+        if (input_is_pressed(K_S)) {
+            viewTrans[2] -= camSpeed;
+        } 
+        if (input_is_pressed(K_D)) {
+            viewTrans[0] -= camSpeed;
+        } 
+        if (input_is_pressed(K_A)) {
+            viewTrans[0] += camSpeed;
+        } 
+        if (input_is_pressed(K_SPACE)) {
+            viewTrans[1] -= camSpeed;
+        } 
+        if (input_is_pressed(K_LSHIFT)) {
+            viewTrans[1] += camSpeed;
+        } 
+
+        clm_mat4_translate(view, viewTrans);
+
+        unsigned int modelLoc = glGetUniformLocation(
+                shader, "model");
+        glUniformMatrix4fv(modelLoc,
+                1, GL_FALSE, model);
+        unsigned int viewLoc = glGetUniformLocation(
+                shader, "view");
+        glUniformMatrix4fv(viewLoc,
+                1, GL_FALSE, view);
+        unsigned int projLoc = glGetUniformLocation(
+                shader, "proj");
+        glUniformMatrix4fv(projLoc,
+                1, GL_FALSE, proj);
 
         // Draw.
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);

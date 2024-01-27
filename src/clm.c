@@ -173,6 +173,36 @@ void clm_mat4_scale(clmMat4 trans, clmVec3 scale) {
     clm_mat4_multiply(trans, scaleMat);
 }
 
+clm_mat4_perspective(clmMat4 proj, 
+        float fov, 
+        float aspectRatio, 
+        float near, 
+        float far) {
+    // Yanked this from:
+    //     Learn WebGL 8.3 Perspective Projections.
+
+    // We need left, right, top and bottom of frustum.
+    float top = near * tanf(fov * 0.5);
+    float bottom = -top;
+    float right = top * aspectRatio;
+    float left = -right;
+    
+    // Now lets a go.
+    // 0 it all out first.
+    for (int i = 0; i < 16; i++) {
+        proj[i] = 0.0f;
+    }
+
+    // Place all the bits in there.
+    proj[0] = (2.0f * near) / (right - left);
+    proj[5] = (2.0f * near) / (top - bottom);
+    proj[10] = (-(far + near)) / (far - near);
+    proj[11] = -1.0f;
+    proj[12] = (-near * (right + left)) / (right - left);
+    proj[13] = (-near * (top + bottom)) / (top - bottom);
+    proj[14] = (2.0f * far * near) / (near - far);
+}
+
 void clm_mat4_print(clmMat4 mat) {
     for (int i = 0; i < 4; i++) {
         // Print each row.

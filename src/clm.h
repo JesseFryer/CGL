@@ -115,6 +115,16 @@ void clm_mat4_rotate(clmMat4 trans,
  */
 void clm_mat4_scale(clmMat4 trans, clmVec3 scale);
 
+/* clm_mat4_perspective
+ * --------------------
+ * Store the perspective projection matrix in proj.
+ */
+clm_mat4_perspective(clmMat4 proj, 
+        float fov, 
+        float aspectRatio, 
+        float near, 
+        float far);
+
 /* clm_mat4_print
  * --------------
  * print mat in a readable format.
