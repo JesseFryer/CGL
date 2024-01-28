@@ -4,21 +4,34 @@
 #include "clm.h"
 
 typedef struct Camera {
+    // View matrix things.
     clmVec3 position;
-    clmVec3 front;
+    clmVec3 front; // TODO: replace with euler angle stuff.
     clmVec3 up;
-    float   speed;
+
+    // Perspective projection things.
+    float   fov;
+    float   near;
+    float   far;
+
+    // Camera direction.
     float   yaw;
     float   pitch;
+
+    // Camera move speed.
+    float   speed;
 } Camera;
 
 /* cam_init_camera
  * ---------------
- * Initialize a perspective camera.
+ * Initialize a perspective camera. Is useful for producing
+ * both the projection and view transforms.
  */
 void cam_init_camera(Camera* cam,
-        float fov, 
         clmVec3 position,
+        float fov, 
+        float near,
+        float far,
         float speed);
 
 /* cam_move
@@ -31,7 +44,19 @@ void cam_move(Camera* cam, clmVec3 move);
 /* cam_view_matrix
  * ---------------
  * Store the camera view matrix in view.
+ * The view matrix is a lookat matrix.
  */
 void cam_view_matrix(Camera* cam, clmMat4 view);
+
+/* cam_proj_matrix
+ * ---------------
+ * Store the camera projection matrix in proj. 
+ * Recalculate this with the new aspect ratio
+ * whenever the window is resized.
+ * The projection matrix is a perspective projection matrix.
+ */
+void cam_proj_matrix(Camera* cam, 
+        float aspectRatio,
+        clmMat4 proj);
 
 #endif

@@ -9,6 +9,7 @@
 
 typedef int KeyCode;
 
+#define K_ESC    GLFW_KEY_ESCAPE
 #define K_SPACE  GLFW_KEY_SPACE
 #define K_LSHIFT GLFW_KEY_LEFT_SHIFT
 #define K_W      GLFW_KEY_W

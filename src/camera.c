@@ -1,21 +1,31 @@
 #include "camera.h"
 
 void cam_init_camera(Camera* cam, 
-        float fov, 
         clmVec3 position,
+        float fov, 
+        float near,
+        float far,
         float speed) {
-    cam->speed = speed;
     cam->position[0] = position[0];
     cam->position[1] = position[1];
     cam->position[2] = position[2];
-    cam->up[0] = 0.0f;
-    cam->up[1] = 1.0f;
-    cam->up[2] = 0.0f;
+
     cam->front[0] = 0.0f;
     cam->front[1] = 0.0f;
     cam->front[2] = -1.0f;
+
+    cam->up[0] = 0.0f;
+    cam->up[1] = 1.0f;
+    cam->up[2] = 0.0f;
+
+    cam->fov  = fov;
+    cam->near = near;
+    cam->far  = far;
+
     cam->yaw = -90.0f;
     cam->pitch = 0.0f;
+
+    cam->speed = speed;
 }
 
 void cam_move(Camera* cam, clmVec3 move) {
@@ -26,13 +36,26 @@ void cam_move(Camera* cam, clmVec3 move) {
 }
 
 void cam_view_matrix(Camera* cam, clmMat4 view) {
+    // TODO: front determined by euler angles.
     clmVec3 target = { 
         cam->position[0] + cam->front[0],
         cam->position[1] + cam->front[1],
         cam->position[2] + cam->front[2]
     };
+
     clm_mat4_lookat(view,
             cam->position,
             target,
             cam->up);
+}
+
+void cam_proj_matrix(Camera* cam, 
+        float aspectRatio,
+        clmMat4 proj) {
+    // Store the perspective projection in proj.
+    clm_mat4_perspective(proj,
+            cam->fov,
+            aspectRatio,
+            cam->near,
+            cam->far);
 }

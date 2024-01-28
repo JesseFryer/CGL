@@ -11,7 +11,6 @@
 
 static int SCR_W = 1600;
 static int SCR_H = 900;
-static bool FRAMEBUFFER_UPDATED = false;
 
 void framebuffer_size_callback(
         GLFWwindow* window, 
@@ -20,7 +19,6 @@ void framebuffer_size_callback(
     glViewport(0, 0, width, height);
     SCR_W = width;
     SCR_H = height;
-    FRAMEBUFFER_UPDATED = true;
 } 
 
 GLFWwindow* init_window(
@@ -46,16 +44,28 @@ GLFWwindow* init_window(
     }
 
     glfwMakeContextCurrent(window);
+
+    //glfwSetInputMode(window, GLFW_CURSOR, 
+    //        GLFW_CURSOR_DISABLED);
+
+    // Maximize window and set SCR_W, SCR_H
+    glfwMaximizeWindow(window);
+    GLFWvidmode vidMode = 
+        *glfwGetVideoMode(glfwGetPrimaryMonitor());
+    SCR_W = vidMode.width;
+    SCR_H = vidMode.height;
+
     return window;
 }
 
 int main() {
-
+    // Create the window.
     GLFWwindow* window = init_window(
             "Learning OpenGL", 
             SCR_W, 
             SCR_H);
 
+    // Set the window input is taken from.
     input_set_window(window);
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
@@ -64,10 +74,10 @@ int main() {
     }
 
     glViewport(0, 0, SCR_W, SCR_H);
+    glEnable(GL_DEPTH_TEST);
     glfwSetFramebufferSizeCallback(
             window, 
             framebuffer_size_callback);
-    glEnable(GL_DEPTH_TEST);
 
     // Create some data.
     float vertices[] = {
@@ -155,77 +165,75 @@ int main() {
     glUseProgram(shader);
     vao_bind(&vao);
 
-    // Projection matrix. (perspective)
-    clmMat4 proj;
-    clm_mat4_perspective(proj, 
-            45.0f,
-            (float) SCR_W / (float) SCR_H,
-            0.1f,
-            100.0f);
-
-    // Camera. 
+    // Camera. View and projection matrices are supplied by
+    // the camera.
     Camera camera;
-    clmVec3 initCamPos = { 0.0f, 0.0f, 2.0f };
+    clmVec3 initCamPos = { 0.0f, 0.0f, 3.0f };
     cam_init_camera(&camera,
-            45.0f,
             initCamPos,
-            0.005f);
+            45.0f,   // fov
+            0.1f,    // near
+            100.0f,  // far
+            0.005f); // speed
 
-    // Store view matrix from camera here each frame.
-    clmMat4 view;
-    clmVec3 viewTrans = { 0.0f, 0.0f, 0.0f };
+    // For our camera.
+    clmVec3 camMove = { 0.0f, 0.0f, 0.0f };
 
-    // Model matrix.
-    clmMat4 model;
-    clmVec3 rotate = { 1.0f, 4.0f, 3.0f };
+    // For our cube.
+    clmVec3 rotate = { 1.0f, 1.0f, 1.0f };
     clm_v3_normalize(rotate);
 
-    while(!glfwWindowShouldClose(window)) {
-        // Events.
-        glfwPollEvents();
+    // mvp matrices.
+    clmMat4 model;
+    clmMat4 view;
+    clmMat4 proj;
 
-        // update aspec ratio in perspective.
-        if (FRAMEBUFFER_UPDATED) {
-            clm_mat4_perspective(proj,
-                    45.0f,
-                    (float) SCR_W / (float) SCR_H,
-                    0.1f,
-                    100.0f);
-            FRAMEBUFFER_UPDATED = false;
+    bool running = true;
+    while(running) {
+        // Events and program exit.
+        glfwPollEvents();
+        if (glfwWindowShouldClose(window) || 
+                input_is_pressed(K_ESC)) {
+            running = false;
         }
 
-        // Test transform. rotate over time.
+        // Rotating our cube here.
         clm_mat4_identity(model);
         clm_mat4_rotate(model, 
                 5.0f * ((float) glfwGetTime()), 
                 rotate);
 
-        // View matrix. 
-        viewTrans[0] = 0.0f;
-        viewTrans[1] = 0.0f;
-        viewTrans[2] = 0.0f;
+        // Move camera.
+        camMove[0] = 0.0f;
+        camMove[1] = 0.0f;
+        camMove[2] = 0.0f;
         if (input_is_pressed(K_W)) {
-            viewTrans[2] -= 1.0f;
+            camMove[2] -= 1.0f;
         } 
         if (input_is_pressed(K_S)) {
-            viewTrans[2] += 1.0f;
+            camMove[2] += 1.0f;
         } 
         if (input_is_pressed(K_D)) {
-            viewTrans[0] += 1.0f;
+            camMove[0] += 1.0f;
         } 
         if (input_is_pressed(K_A)) {
-            viewTrans[0] -= 1.0f;
+            camMove[0] -= 1.0f;
         } 
         if (input_is_pressed(K_SPACE)) {
-            viewTrans[1] += 1.0f;
+            camMove[1] += 1.0f;
         } 
         if (input_is_pressed(K_LSHIFT)) {
-            viewTrans[1] -= 1.0f;
+            camMove[1] -= 1.0f;
         } 
+        cam_move(&camera, camMove);
 
-        cam_move(&camera, viewTrans);
+        // Update our view and projection transforms.
         cam_view_matrix(&camera, view);
+        cam_proj_matrix(&camera,
+                (float) SCR_W / (float) SCR_H,
+                proj);
 
+        // Supply mvp matrices to shader.
         unsigned int modelLoc = glGetUniformLocation(
                 shader, "model");
         glUniformMatrix4fv(modelLoc,
