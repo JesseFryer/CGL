@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <stdbool.h>
 #include "input.h"
 #include "shader.h"
 #include "vao.h"
@@ -8,14 +9,18 @@
 #include "clm.h"
 #include "camera.h"
 
-#define SCR_W 1600
-#define SCR_H 1200
+static int SCR_W = 1600;
+static int SCR_H = 900;
+static bool FRAMEBUFFER_UPDATED = false;
 
 void framebuffer_size_callback(
         GLFWwindow* window, 
         int width, 
         int height) {
     glViewport(0, 0, width, height);
+    SCR_W = width;
+    SCR_H = height;
+    FRAMEBUFFER_UPDATED = true;
 } 
 
 GLFWwindow* init_window(
@@ -62,13 +67,51 @@ int main() {
     glfwSetFramebufferSizeCallback(
             window, 
             framebuffer_size_callback);
+    glEnable(GL_DEPTH_TEST);
 
     // Create some data.
     float vertices[] = {
-        -0.5f, -0.5f, 0.0f, // bottom left
-         0.5f, -0.5f, 0.0f, // bottom right
-        -0.5f,  0.5f, 0.0f, // top left
-         0.5f,  0.5f, 0.0f  // top right
+        -0.5f, -0.5f, -0.5f,
+         0.5f, -0.5f, -0.5f,
+         0.5f,  0.5f, -0.5f,
+         0.5f,  0.5f, -0.5f,
+        -0.5f,  0.5f, -0.5f,
+        -0.5f, -0.5f, -0.5f,
+
+        -0.5f, -0.5f,  0.5f,
+         0.5f, -0.5f,  0.5f,
+         0.5f,  0.5f,  0.5f,
+         0.5f,  0.5f,  0.5f,
+        -0.5f,  0.5f,  0.5f,
+        -0.5f, -0.5f,  0.5f,
+
+        -0.5f,  0.5f,  0.5f,
+        -0.5f,  0.5f, -0.5f,
+        -0.5f, -0.5f, -0.5f,
+        -0.5f, -0.5f, -0.5f,
+        -0.5f, -0.5f,  0.5f,
+        -0.5f,  0.5f,  0.5f,
+
+         0.5f,  0.5f,  0.5f,
+         0.5f,  0.5f, -0.5f,
+         0.5f, -0.5f, -0.5f,
+         0.5f, -0.5f, -0.5f,
+         0.5f, -0.5f,  0.5f,
+         0.5f,  0.5f,  0.5f,
+
+        -0.5f, -0.5f, -0.5f,
+         0.5f, -0.5f, -0.5f,
+         0.5f, -0.5f,  0.5f,
+         0.5f, -0.5f,  0.5f,
+        -0.5f, -0.5f,  0.5f,
+        -0.5f, -0.5f, -0.5f,
+
+        -0.5f,  0.5f, -0.5f,
+         0.5f,  0.5f, -0.5f,
+         0.5f,  0.5f,  0.5f,
+         0.5f,  0.5f,  0.5f,
+        -0.5f,  0.5f,  0.5f,
+        -0.5f,  0.5f, -0.5f
     };
 
     unsigned int indices[] = {
@@ -120,60 +163,64 @@ int main() {
             0.1f,
             100.0f);
 
-    // View matrix.
+    // Camera. 
     Camera camera;
-    clmVec3 initCamPos = { 0.0f, 0.0f, -3.0f };
+    clmVec3 initCamPos = { 0.0f, 0.0f, 2.0f };
     cam_init_camera(&camera,
             45.0f,
-            (float) SCR_W / (float) SCR_H,
             initCamPos,
-            0.001f);
+            0.005f);
 
+    // Store view matrix from camera here each frame.
     clmMat4 view;
     clmVec3 viewTrans = { 0.0f, 0.0f, 0.0f };
 
     // Model matrix.
     clmMat4 model;
-    clmVec3 translate = { 0.25f, 0.25f, 0.0f };
-    clmVec3 scale = { 0.25f, 0.25f, 0.25f };
-    clmVec3 rotate = { 1.0f, 8.0f, 3.0f };
+    clmVec3 rotate = { 1.0f, 4.0f, 3.0f };
     clm_v3_normalize(rotate);
-
-    float camSpeed = 0.002f;
 
     while(!glfwWindowShouldClose(window)) {
         // Events.
-        glfwPollEvents();    
+        glfwPollEvents();
+
+        // update aspec ratio in perspective.
+        if (FRAMEBUFFER_UPDATED) {
+            clm_mat4_perspective(proj,
+                    45.0f,
+                    (float) SCR_W / (float) SCR_H,
+                    0.1f,
+                    100.0f);
+            FRAMEBUFFER_UPDATED = false;
+        }
 
         // Test transform. rotate over time.
         clm_mat4_identity(model);
-        clm_mat4_scale(model, scale);
         clm_mat4_rotate(model, 
                 5.0f * ((float) glfwGetTime()), 
                 rotate);
-        clm_mat4_translate(model, translate);
 
         // View matrix. 
         viewTrans[0] = 0.0f;
         viewTrans[1] = 0.0f;
         viewTrans[2] = 0.0f;
         if (input_is_pressed(K_W)) {
-            viewTrans[2] += 1.0f;
-        } 
-        if (input_is_pressed(K_S)) {
             viewTrans[2] -= 1.0f;
         } 
-        if (input_is_pressed(K_D)) {
-            viewTrans[0] -= 1.0f;
+        if (input_is_pressed(K_S)) {
+            viewTrans[2] += 1.0f;
         } 
-        if (input_is_pressed(K_A)) {
+        if (input_is_pressed(K_D)) {
             viewTrans[0] += 1.0f;
         } 
+        if (input_is_pressed(K_A)) {
+            viewTrans[0] -= 1.0f;
+        } 
         if (input_is_pressed(K_SPACE)) {
-            viewTrans[1] -= 1.0f;
+            viewTrans[1] += 1.0f;
         } 
         if (input_is_pressed(K_LSHIFT)) {
-            viewTrans[1] += 1.0f;
+            viewTrans[1] -= 1.0f;
         } 
 
         cam_move(&camera, viewTrans);
@@ -196,8 +243,9 @@ int main() {
 
         // Draw.
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        //glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
         glfwSwapBuffers(window);
     }
 

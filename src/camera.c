@@ -2,18 +2,20 @@
 
 void cam_init_camera(Camera* cam, 
         float fov, 
-        float aspectRatio,
         clmVec3 position,
         float speed) {
-    clm_mat4_perspective(cam->proj, 
-            fov, 
-            aspectRatio,
-            0.1f,
-            100.0f);
     cam->speed = speed;
     cam->position[0] = position[0];
     cam->position[1] = position[1];
     cam->position[2] = position[2];
+    cam->up[0] = 0.0f;
+    cam->up[1] = 1.0f;
+    cam->up[2] = 0.0f;
+    cam->front[0] = 0.0f;
+    cam->front[0] = 0.0f;
+    cam->front[1] = -1.0f;
+    cam->yaw = -90.0f;
+    cam->pitch = 0.0f;
 }
 
 void cam_move(Camera* cam, clmVec3 move) {
@@ -24,6 +26,13 @@ void cam_move(Camera* cam, clmVec3 move) {
 }
 
 void cam_view_matrix(Camera* cam, clmMat4 view) {
-    clm_mat4_identity(view);
-    clm_mat4_translate(view, cam->position);
+    clmVec3 target = { 
+        cam->position[0],
+        cam->position[1],
+        -1.0f
+    };
+    clm_mat4_lookat(view,
+            cam->position,
+            target,
+            cam->up);
 }

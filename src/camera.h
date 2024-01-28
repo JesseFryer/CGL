@@ -4,9 +4,12 @@
 #include "clm.h"
 
 typedef struct Camera {
-    clmMat4 proj;
     clmVec3 position;
+    clmVec3 front;
+    clmVec3 up;
     float   speed;
+    float   yaw;
+    float   pitch;
 } Camera;
 
 /* cam_init_camera
@@ -15,7 +18,6 @@ typedef struct Camera {
  */
 void cam_init_camera(Camera* cam,
         float fov, 
-        float aspectRatio,
         clmVec3 position,
         float speed);
 

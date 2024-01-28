@@ -80,8 +80,7 @@ void clm_v3_normalize(clmVec3 v);
 
 /* clm_mat4_mul
  * ------------
- * Compute  mat1 x mat2, result overwrites
- * mat1.
+ * Compute  mat1 x mat2, stores result in mat1.
  */
 void clm_mat4_multiply(clmMat4 mat1, clmMat4 mat2);
 
@@ -127,6 +126,15 @@ void clm_mat4_perspective(clmMat4 proj,
         float aspectRatio, 
         float near, 
         float far);
+
+/* clm_mat4_lookat
+ * ---------------
+ * Store the lookat view matrix in lookat.
+ */
+void clm_mat4_lookat(clmMat4 lookat,
+        clmVec3 position,
+        clmVec3 target,
+        clmVec3 up);
 
 /* clm_mat4_print
  * --------------

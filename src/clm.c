@@ -173,7 +173,7 @@ void clm_mat4_scale(clmMat4 trans, clmVec3 scale) {
     clm_mat4_multiply(trans, scaleMat);
 }
 
-clm_mat4_perspective(clmMat4 proj, 
+void clm_mat4_perspective(clmMat4 proj, 
         float fov, 
         float aspectRatio, 
         float near, 
@@ -201,6 +201,49 @@ clm_mat4_perspective(clmMat4 proj,
     proj[12] = (-near * (right + left)) / (right - left);
     proj[13] = (-near * (top + bottom)) / (top - bottom);
     proj[14] = (2.0f * far * near) / (near - far);
+}
+
+void clm_mat4_lookat(clmMat4 lookat,
+        clmVec3 position,
+        clmVec3 target,
+        clmVec3 up) {
+    // Get the camera face vector.
+    clmVec3 camDir;
+    clm_v3_scalar_multiply(-1.0f, target);
+    clm_v3_add(position, target, camDir);
+    clm_v3_normalize(camDir);
+
+    // Get the right vector.
+    clmVec3 camRight;
+    clm_v3_cross_product(up, camDir, camRight);
+    clm_v3_normalize(camRight);
+
+    // Get the camera up vector.
+    clmVec3 camUp;
+    clm_v3_cross_product(camDir, camRight, camUp);
+
+    // Multiply these two together after setting them up.
+    clmMat4 positionTrans;
+    clm_mat4_identity(positionTrans);
+    clm_mat4_identity(lookat);
+
+    lookat[0] = camRight[0];
+    lookat[4] = camRight[1];
+    lookat[8] = camRight[2];
+
+    lookat[1] = camUp[0];
+    lookat[5] = camUp[1];
+    lookat[9] = camUp[2];
+
+    lookat[2]  = camDir[0];
+    lookat[6]  = camDir[1];
+    lookat[10] = camDir[2];
+
+    positionTrans[12] = -position[0];
+    positionTrans[13] = -position[1];
+    positionTrans[14] = -position[2];
+
+    clm_mat4_multiply(lookat, positionTrans);
 }
 
 void clm_mat4_print(clmMat4 mat) {
