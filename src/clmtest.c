@@ -1,5 +1,6 @@
 #include "clm.h"
 #include <stdio.h>
+#include <math.h>
 
 int main() {
     clmVec2 v1 = { 1.0f, 2.0f };
@@ -64,6 +65,9 @@ int main() {
     clm_v3_normalize(v);
     printf("\nnormlized:\n");
     clm_v3_print(v);
+
+
+    printf("sqrt(4): %f\n", sqrt(4));
 
     return 0;
 }

@@ -17,7 +17,7 @@ set src=%srcDir%main.c^
 set libs=glfw3.lib opengl32.lib user32.lib gdi32.lib shell32.lib ws2_32.lib
 
 set compFlags=/I %incDir% /Zl
-set linkFlags=/LIBPATH:%libDir% 
+set linkFlags=/LIBPATH:%libDir%
 
 mkdir buildfiles
 

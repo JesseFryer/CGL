@@ -6,7 +6,6 @@
 typedef struct Camera {
     // View matrix things.
     clmVec3 position;
-    clmVec3 front; // TODO: replace with euler angle stuff.
     clmVec3 up;
 
     // Perspective projection things.
@@ -20,6 +19,7 @@ typedef struct Camera {
 
     // Camera move speed.
     float   speed;
+    float   sense;
 } Camera;
 
 /* cam_init_camera
@@ -32,7 +32,8 @@ void cam_init_camera(Camera* cam,
         float fov, 
         float near,
         float far,
-        float speed);
+        float speed,
+        float sense);
 
 /* cam_move
  * --------
@@ -58,5 +59,11 @@ void cam_view_matrix(Camera* cam, clmMat4 view);
 void cam_proj_matrix(Camera* cam, 
         float aspectRatio,
         clmMat4 proj);
+
+/* cam_rotate_camera
+ * -----------------
+ * Rotate the camera by an offset.
+ */
+void cam_rotate_camera(Camera* cam, float yaw, float pitch);
 
 #endif

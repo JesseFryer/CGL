@@ -12,6 +12,11 @@
 static int SCR_W = 1600;
 static int SCR_H = 900;
 
+static float CURS_LAST_X;
+static float CURS_LAST_Y;
+
+static Camera camera;
+
 void framebuffer_size_callback(
         GLFWwindow* window, 
         int width, 
@@ -20,6 +25,26 @@ void framebuffer_size_callback(
     SCR_W = width;
     SCR_H = height;
 } 
+
+void mouse_cursor_callback(
+        GLFWwindow* window,
+        double xpos,
+        double ypos) {
+    static bool first = true;
+    if (first) {
+        CURS_LAST_X = xpos;
+        CURS_LAST_Y = ypos;
+        first = false;
+    }
+
+    float yaw = xpos - CURS_LAST_X;
+    float pitch = CURS_LAST_Y - ypos;
+
+    cam_rotate_camera(&camera, yaw, pitch);
+
+    CURS_LAST_X = xpos;
+    CURS_LAST_Y = ypos;
+}
 
 GLFWwindow* init_window(
         const char* title, 
@@ -45,8 +70,8 @@ GLFWwindow* init_window(
 
     glfwMakeContextCurrent(window);
 
-    //glfwSetInputMode(window, GLFW_CURSOR, 
-    //        GLFW_CURSOR_DISABLED);
+    glfwSetInputMode(window, GLFW_CURSOR, 
+            GLFW_CURSOR_DISABLED);
 
     // Maximize window and set SCR_W, SCR_H
     glfwMaximizeWindow(window);
@@ -54,6 +79,8 @@ GLFWwindow* init_window(
         *glfwGetVideoMode(glfwGetPrimaryMonitor());
     SCR_W = vidMode.width;
     SCR_H = vidMode.height;
+    CURS_LAST_X = SCR_W / 2;
+    CURS_LAST_Y = SCR_H / 2;
 
     return window;
 }
@@ -75,9 +102,10 @@ int main() {
 
     glViewport(0, 0, SCR_W, SCR_H);
     glEnable(GL_DEPTH_TEST);
-    glfwSetFramebufferSizeCallback(
-            window, 
+    glfwSetFramebufferSizeCallback(window, 
             framebuffer_size_callback);
+    glfwSetCursorPosCallback(window, 
+            mouse_cursor_callback);
 
     // Create some data.
     float vertices[] = {
@@ -165,28 +193,25 @@ int main() {
     glUseProgram(shader);
     vao_bind(&vao);
 
-    // Camera. View and projection matrices are supplied by
-    // the camera.
-    Camera camera;
+    // mvp matrices.
+    clmMat4 model;
+    clmMat4 view;
+    clmMat4 proj;
+
+    // For our cube.
+    clmVec3 rotate = { 1.0f, 1.0f, 1.0f };
+    clm_v3_normalize(rotate);
+
+    // For our camera.
+    clmVec3 camMove = { 0.0f, 0.0f, 0.0f };
     clmVec3 initCamPos = { 0.0f, 0.0f, 3.0f };
     cam_init_camera(&camera,
             initCamPos,
             45.0f,   // fov
             0.1f,    // near
             100.0f,  // far
-            0.005f); // speed
-
-    // For our camera.
-    clmVec3 camMove = { 0.0f, 0.0f, 0.0f };
-
-    // For our cube.
-    clmVec3 rotate = { 1.0f, 1.0f, 1.0f };
-    clm_v3_normalize(rotate);
-
-    // mvp matrices.
-    clmMat4 model;
-    clmMat4 view;
-    clmMat4 proj;
+            0.002f,  // speed
+            0.05f); // sense
 
     bool running = true;
     while(running) {
@@ -204,26 +229,26 @@ int main() {
                 rotate);
 
         // Move camera.
-        camMove[0] = 0.0f;
-        camMove[1] = 0.0f;
-        camMove[2] = 0.0f;
+        camMove[0] = 0.0f; // forward/back 1.0/-1.0
+        camMove[1] = 0.0f; // right/left   1.0/-1.0
+        camMove[2] = 0.0f; // up/down      1.0/-1.0
         if (input_is_pressed(K_W)) {
-            camMove[2] -= 1.0f;
-        } 
-        if (input_is_pressed(K_S)) {
-            camMove[2] += 1.0f;
-        } 
-        if (input_is_pressed(K_D)) {
             camMove[0] += 1.0f;
         } 
-        if (input_is_pressed(K_A)) {
+        if (input_is_pressed(K_S)) {
             camMove[0] -= 1.0f;
         } 
-        if (input_is_pressed(K_SPACE)) {
+        if (input_is_pressed(K_D)) {
             camMove[1] += 1.0f;
         } 
-        if (input_is_pressed(K_LSHIFT)) {
+        if (input_is_pressed(K_A)) {
             camMove[1] -= 1.0f;
+        } 
+        if (input_is_pressed(K_SPACE)) {
+            camMove[2] += 1.0f;
+        } 
+        if (input_is_pressed(K_LSHIFT)) {
+            camMove[2] -= 1.0f;
         } 
         cam_move(&camera, camMove);
 

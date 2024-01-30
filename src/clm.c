@@ -1,6 +1,10 @@
 #include "clm.h"
 #include <math.h>
 
+float clm_radians(float deg) {
+    return deg * (PI / 180.0f);
+}
+
 float clm_v2_dot_product(clmVec2 v1, clmVec2 v2) {
     return (v1[0] * v2[0]) + (v1[1] * v2[1]);
 }
@@ -54,9 +58,10 @@ void clm_v3_cross_product(clmVec3 v1, clmVec3 v2,
 
 void clm_v3_normalize(clmVec3 v) {
     float len = clm_v3_length(v);
-    v[0] /= len;
-    v[1] /= len;
-    v[2] /= len;
+    if (len) {
+        float invLen = 1.0f / len;
+        clm_v3_scalar_multiply(invLen, v);
+    }
 }
 
 void clm_mat4_multiply(clmMat4 mat1, clmMat4 mat2) {

@@ -15,7 +15,13 @@ typedef float clmVec4[4];
 typedef float clmMat3[9];
 typedef float clmMat4[16];
 
-#define PI 3.14159265359
+#define PI 3.14159265359f
+
+/* clm_radians
+ * -----------
+ * Convert degrees to radians.
+ */
+float clm_radians(float deg);
 
 /* clm_v2_dot_product
  * ------------------
