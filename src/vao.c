@@ -25,7 +25,9 @@ void vao_ebo_data(
         VAO* vao,
         GLsizeiptr size,
         const GLvoid* data,
-        GLenum usage) {
+        GLenum usage,
+        unsigned int indicesCount) {
+    vao->indicesCount = indicesCount;
 
     vao_bind(vao);
 

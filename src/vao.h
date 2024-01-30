@@ -6,6 +6,7 @@
 typedef struct VAO {
     unsigned int id;
     unsigned int ebo;
+    unsigned int indicesCount;
 } VAO;
 
 /* vao_init
@@ -34,7 +35,8 @@ void vao_ebo_data(
         VAO* vao,
         GLsizeiptr size,
         const GLvoid* data,
-        GLenum usage);
+        GLenum usage,
+        unsigned int indicesCount);
 
 /* vao_vertex_attrib
  * -----------------

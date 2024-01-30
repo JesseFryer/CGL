@@ -48,6 +48,9 @@ void cam_move(Camera* cam, clmVec3 move) {
     clmVec3 up = { cam->up[0], cam->up[1], cam->up[2] };
 
     front_vector(cam, front);
+    // These two lines will make it like minecraft.
+    //front[1] = 0.0f; 
+    //clm_v3_normalize(front);
     clm_v3_cross_product(front, cam->up, side);
     clm_v3_normalize(side);
 

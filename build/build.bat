@@ -12,7 +12,8 @@ set src=%srcDir%main.c^
  %srcDir%shader.c^
  %srcDir%vao.c^
  %srcDir%clm.c^
- %srcDir%camera.c
+ %srcDir%camera.c^
+ %srcDir%object.c
 
 set libs=glfw3.lib opengl32.lib user32.lib gdi32.lib shell32.lib ws2_32.lib
 
