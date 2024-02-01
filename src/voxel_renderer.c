@@ -1,16 +1,37 @@
 #include "voxel_renderer.h"
 #include "vao.h"
+#include <stdio.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <stdlib.h>
 
 typedef struct RenderData {
-    VAO vao;
+    VAO          vao;
     unsigned int vbo;
-    unsigned int indices[MAX_INDICES];
+    unsigned int shader;
+    Vertex*      vBuffer;
+    Vertex*      vBufferPtr;
+    GLsizei      indicesCount;
 } RenderData;
 
 static RenderData s_rData;
 
 void voxren_init() {
-    // Setup our vao and ebo.
+    // Setup vbo.
+    glGenBuffers(1, &s_rData.vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, s_rData.vbo);
+    glBufferData(
+            GL_ARRAY_BUFFER,
+            MAX_VERTICES * sizeof(Vertex),
+            NULL,
+            GL_DYNAMIC_DRAW);
+
+    // Setup vertex buffer.
+    s_rData.vBuffer = (Vertex*) malloc(MAX_VERTICES * sizeof(Vertex));
+    s_rData.vBufferPtr = s_rData.vBuffer;
+    s_rData.indicesCount = 0;
+
+    // Setup our vao and ebo layout.
     vao_init(&s_rData.vao);
     vao_vertex_attrib(
             &s_rData.vao,
@@ -22,52 +43,216 @@ void voxren_init() {
             (void*) offsetof(Vertex, position));
 
     // Generate indices buffer and send it to GPU.
-    unsigned int* indices = s_rData.indices;
-    size_t indicesIndex = 0;
-    for (unsigned int voxel = 0; voxel < MAX_VOXELS; voxel++) {
-        unsigned int startIndex = voxel * 24;
-        // We need to fill out 6 quads of indices to make the voxel.
-        indices[indicesIndex++] = startIndex + 0;
-        indices[indicesIndex++] = startIndex + 1;
-        indices[indicesIndex++] = startIndex + 2;
-        indices[indicesIndex++] = startIndex + 2;
-        indices[indicesIndex++] = startIndex + 0;
-        indices[indicesIndex++] = startIndex + 3;
+    uint32_t indices[MAX_INDICES];
+    uint32_t offset = 0;
+    for (size_t i = 0; i < MAX_INDICES; i += 6) {
+        indices[i + 0] = offset + 0;
+        indices[i + 1] = offset + 1;
+        indices[i + 2] = offset + 2;
 
-        indices[indicesIndex++] = startIndex + 4;
-        indices[indicesIndex++] = startIndex + 5;
-        indices[indicesIndex++] = startIndex + 6;
-        indices[indicesIndex++] = startIndex + 6;
-        indices[indicesIndex++] = startIndex + 4;
-        indices[indicesIndex++] = startIndex + 7;
+        indices[i + 3] = offset + 2;
+        indices[i + 4] = offset + 3;
+        indices[i + 5] = offset + 0;
 
-        indices[indicesIndex++] = startIndex + 8;
-        indices[indicesIndex++] = startIndex + 9;
-        indices[indicesIndex++] = startIndex + 10;
-        indices[indicesIndex++] = startIndex + 10;
-        indices[indicesIndex++] = startIndex + 8;
-        indices[indicesIndex++] = startIndex + 11;
-
-        indices[indicesIndex++] = startIndex + 12;
-        indices[indicesIndex++] = startIndex + 13;
-        indices[indicesIndex++] = startIndex + 14;
-        indices[indicesIndex++] = startIndex + 14;
-        indices[indicesIndex++] = startIndex + 12;
-        indices[indicesIndex++] = startIndex + 15;
-
-        indices[indicesIndex++] = startIndex + 16;
-        indices[indicesIndex++] = startIndex + 17;
-        indices[indicesIndex++] = startIndex + 18;
-        indices[indicesIndex++] = startIndex + 18;
-        indices[indicesIndex++] = startIndex + 16;
-        indices[indicesIndex++] = startIndex + 19;
-
-        indices[indicesIndex++] = startIndex + 20;
-        indices[indicesIndex++] = startIndex + 21;
-        indices[indicesIndex++] = startIndex + 22;
-        indices[indicesIndex++] = startIndex + 22;
-        indices[indicesIndex++] = startIndex + 20;
-        indices[indicesIndex++] = startIndex + 23;
+        offset += 4;
     }
 
+    // Give ebo the indices array. This stays here
+    // forever, only need to change how many we use.
+    vao_ebo_data(
+            &s_rData.vao,
+            sizeof(indices),
+            indices,
+            GL_STATIC_DRAW);
+
+}
+
+void voxren_submit_vox(clmVec3 position) {
+    // For a voxel, 24 vertices are used, 4 for each rectangular face.
+    // They are added in anti-clockwise order, so bottom left/right then
+    // top right/left.
+   
+    // When the buffers are full flush the batch.
+    if (s_rData.indicesCount >= MAX_INDICES) {
+        voxren_render_batch();
+    }
+
+    // Unpack frequently used info.
+    float x = position[0];
+    float y = position[1];
+    float z = position[2];
+
+    // Front face of voxel.
+    // Bottom-left.
+    s_rData.vBufferPtr->position[0] = -0.5f + x;
+    s_rData.vBufferPtr->position[1] = -0.5f + y;
+    s_rData.vBufferPtr->position[2] =  0.5f + z;
+    s_rData.vBufferPtr++;
+
+    // Bottom-right.
+    s_rData.vBufferPtr->position[0] =  0.5f + x;
+    s_rData.vBufferPtr->position[1] = -0.5f + y;
+    s_rData.vBufferPtr->position[2] =  0.5f + z;
+    s_rData.vBufferPtr++;
+    // Top-right.
+    s_rData.vBufferPtr->position[0] =  0.5f + x;
+    s_rData.vBufferPtr->position[1] =  0.5f + y;
+    s_rData.vBufferPtr->position[2] =  0.5f + z;
+    s_rData.vBufferPtr++;
+    // Top-left.
+    s_rData.vBufferPtr->position[0] = -0.5f + x;
+    s_rData.vBufferPtr->position[1] =  0.5f + y;
+    s_rData.vBufferPtr->position[2] =  0.5f + z;
+    s_rData.vBufferPtr++;
+
+
+    // Right face of voxel.
+    // Bottom-left.
+    s_rData.vBufferPtr->position[0] =  0.5f + x;
+    s_rData.vBufferPtr->position[1] = -0.5f + y;
+    s_rData.vBufferPtr->position[2] =  0.5f + z;
+    s_rData.vBufferPtr++;
+    // Bottom-right.
+    s_rData.vBufferPtr->position[0] =  0.5f + x;
+    s_rData.vBufferPtr->position[1] = -0.5f + y;
+    s_rData.vBufferPtr->position[2] = -0.5f + z;
+    s_rData.vBufferPtr++;
+    // Top-right.
+    s_rData.vBufferPtr->position[0] =  0.5f + x;
+    s_rData.vBufferPtr->position[1] =  0.5f + y;
+    s_rData.vBufferPtr->position[2] = -0.5f + z;
+    s_rData.vBufferPtr++;
+    // Top-left.
+    s_rData.vBufferPtr->position[0] =  0.5f + x;
+    s_rData.vBufferPtr->position[1] =  0.5f + y;
+    s_rData.vBufferPtr->position[2] =  0.5f + z;
+    s_rData.vBufferPtr++;
+
+
+    // Back face of voxel.
+    // Bottom-left.
+    s_rData.vBufferPtr->position[0] =  0.5f + x;
+    s_rData.vBufferPtr->position[1] = -0.5f + y;
+    s_rData.vBufferPtr->position[2] = -0.5f + z;
+    s_rData.vBufferPtr++;
+    // Bottom-right.
+    s_rData.vBufferPtr->position[0] = -0.5f + x;
+    s_rData.vBufferPtr->position[1] = -0.5f + y;
+    s_rData.vBufferPtr->position[2] = -0.5f + z;
+    s_rData.vBufferPtr++;
+    // Top-right.
+    s_rData.vBufferPtr->position[0] = -0.5f + x;
+    s_rData.vBufferPtr->position[1] =  0.5f + y;
+    s_rData.vBufferPtr->position[2] = -0.5f + z;
+    s_rData.vBufferPtr++;
+    // Top-left.
+    s_rData.vBufferPtr->position[0] =  0.5f + x;
+    s_rData.vBufferPtr->position[1] =  0.5f + y;
+    s_rData.vBufferPtr->position[2] = -0.5f + z;
+    s_rData.vBufferPtr++;
+
+
+    // Left face of voxel.
+    // Bottom-left.
+    s_rData.vBufferPtr->position[0] = -0.5f + x;
+    s_rData.vBufferPtr->position[1] = -0.5f + y;
+    s_rData.vBufferPtr->position[2] = -0.5f + z;
+    s_rData.vBufferPtr++;
+    // Bottom-right.
+    s_rData.vBufferPtr->position[0] = -0.5f + x;
+    s_rData.vBufferPtr->position[1] = -0.5f + y;
+    s_rData.vBufferPtr->position[2] =  0.5f + z;
+    s_rData.vBufferPtr++;
+    // Top-right.
+    s_rData.vBufferPtr->position[0] = -0.5f + x;
+    s_rData.vBufferPtr->position[1] =  0.5f + y;
+    s_rData.vBufferPtr->position[2] =  0.5f + z;
+    s_rData.vBufferPtr++;
+    // Top-left.
+    s_rData.vBufferPtr->position[0] = -0.5f + x;
+    s_rData.vBufferPtr->position[1] =  0.5f + y;
+    s_rData.vBufferPtr->position[2] = -0.5f + z;
+    s_rData.vBufferPtr++;
+
+
+    // Bottom face of voxel.
+    // Bottom-left.
+    s_rData.vBufferPtr->position[0] = -0.5f + x;
+    s_rData.vBufferPtr->position[1] = -0.5f + y;
+    s_rData.vBufferPtr->position[2] = -0.5f + z;
+    s_rData.vBufferPtr++;
+    // Bottom-right.
+    s_rData.vBufferPtr->position[0] =  0.5f + x;
+    s_rData.vBufferPtr->position[1] = -0.5f + y;
+    s_rData.vBufferPtr->position[2] = -0.5f + z;
+    s_rData.vBufferPtr++;
+    // Top-right.
+    s_rData.vBufferPtr->position[0] =  0.5f + x;
+    s_rData.vBufferPtr->position[1] = -0.5f + y;
+    s_rData.vBufferPtr->position[2] =  0.5f + z;
+    s_rData.vBufferPtr++;
+    // Top-left.
+    s_rData.vBufferPtr->position[0] = -0.5f + x;
+    s_rData.vBufferPtr->position[1] = -0.5f + y;
+    s_rData.vBufferPtr->position[2] =  0.5f + z;
+    s_rData.vBufferPtr++;
+
+
+    // Top face of voxel.
+    // Bottom-left.
+    s_rData.vBufferPtr->position[0] = -0.5f + x;
+    s_rData.vBufferPtr->position[1] =  0.5f + y;
+    s_rData.vBufferPtr->position[2] =  0.5f + z;
+    s_rData.vBufferPtr++;
+    // Bottom-right.
+    s_rData.vBufferPtr->position[0] =  0.5f + x;
+    s_rData.vBufferPtr->position[1] =  0.5f + y;
+    s_rData.vBufferPtr->position[2] =  0.5f + z;
+    s_rData.vBufferPtr++;
+    // Top-right.
+    s_rData.vBufferPtr->position[0] =  0.5f + x;
+    s_rData.vBufferPtr->position[1] =  0.5f + y;
+    s_rData.vBufferPtr->position[2] = -0.5f + z;
+    s_rData.vBufferPtr++;
+    // Top-left.
+    s_rData.vBufferPtr->position[0] = -0.5f + x;
+    s_rData.vBufferPtr->position[1] =  0.5f + y;
+    s_rData.vBufferPtr->position[2] = -0.5f + z;
+    s_rData.vBufferPtr++;
+
+    s_rData.indicesCount += INDICES_PER_VOXEL;
+}
+
+void voxren_render_batch() {
+    // Bind vao and use shader.
+    vao_bind(&s_rData.vao);
+
+    // Bind vbo and supply vertices.
+    GLsizeiptr size = 
+        (uint8_t*) s_rData.vBufferPtr - (uint8_t*) s_rData.vBuffer;
+    glBindBuffer(GL_ARRAY_BUFFER, s_rData.vbo);
+    glBufferSubData(
+            GL_ARRAY_BUFFER, 
+            0,
+            size,
+            s_rData.vBuffer);
+
+    // Render draw call.
+    glDrawElements(
+            GL_TRIANGLES,
+            s_rData.indicesCount,
+            GL_UNSIGNED_INT,
+            0);
+
+    // Reset indices count and vBufferPtr.
+    s_rData.indicesCount = 0;
+    s_rData.vBufferPtr = s_rData.vBuffer;
+}
+
+void voxren_set_shader(unsigned int shader) {
+    s_rData.shader = shader;
+}
+
+void voxren_terminate() {
+    free(s_rData.vBuffer);
 }

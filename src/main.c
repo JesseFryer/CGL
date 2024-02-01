@@ -5,10 +5,9 @@
 #include "input.h"
 #include "shader.h"
 #include "vao.h"
-#include "vertex.h"
 #include "clm.h"
 #include "camera.h"
-#include "object.h"
+#include "voxel_renderer.h"
 
 static int SCR_W = 1600;
 static int SCR_H = 900;
@@ -108,95 +107,14 @@ int main() {
     glfwSetCursorPosCallback(window, 
             mouse_cursor_callback);
 
-    // Create some data.
-    float vertices[] = {
-        -0.5f, -0.5f, -0.5f,
-         0.5f, -0.5f, -0.5f,
-         0.5f,  0.5f, -0.5f,
-         0.5f,  0.5f, -0.5f,
-        -0.5f,  0.5f, -0.5f,
-        -0.5f, -0.5f, -0.5f,
-
-        -0.5f, -0.5f,  0.5f,
-         0.5f, -0.5f,  0.5f,
-         0.5f,  0.5f,  0.5f,
-         0.5f,  0.5f,  0.5f,
-        -0.5f,  0.5f,  0.5f,
-        -0.5f, -0.5f,  0.5f,
-
-        -0.5f,  0.5f,  0.5f,
-        -0.5f,  0.5f, -0.5f,
-        -0.5f, -0.5f, -0.5f,
-        -0.5f, -0.5f, -0.5f,
-        -0.5f, -0.5f,  0.5f,
-        -0.5f,  0.5f,  0.5f,
-
-         0.5f,  0.5f,  0.5f,
-         0.5f,  0.5f, -0.5f,
-         0.5f, -0.5f, -0.5f,
-         0.5f, -0.5f, -0.5f,
-         0.5f, -0.5f,  0.5f,
-         0.5f,  0.5f,  0.5f,
-
-        -0.5f, -0.5f, -0.5f,
-         0.5f, -0.5f, -0.5f,
-         0.5f, -0.5f,  0.5f,
-         0.5f, -0.5f,  0.5f,
-        -0.5f, -0.5f,  0.5f,
-        -0.5f, -0.5f, -0.5f,
-
-        -0.5f,  0.5f, -0.5f,
-         0.5f,  0.5f, -0.5f,
-         0.5f,  0.5f,  0.5f,
-         0.5f,  0.5f,  0.5f,
-        -0.5f,  0.5f,  0.5f,
-        -0.5f,  0.5f, -0.5f
-    };
-
-    // Defeats the prupose lazy but fix later.
-    unsigned int indices[] = {
-        0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12,
-        13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23,
-        24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34,
-        35
-    };
-
-    unsigned int vbo;
-    glGenBuffers(1, &vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER,
-            sizeof(vertices), 
-            vertices,
-            GL_STATIC_DRAW);
-
-    // Stores layout and indices.
-    VAO vao;
-    vao_init(&vao);
-
-    // Give ebo indices.
-    vao_ebo_data(
-            &vao,
-            sizeof(indices),
-            indices,
-            GL_STATIC_DRAW,
-            36);
-
-    // Specify layout.
-    vao_vertex_attrib(
-            &vao,
-            0,
-            3,
-            GL_FLOAT,
-            GL_FALSE,
-            sizeof(Vertex),
-            (void*) offsetof(Vertex, position));
-
     unsigned int shader = shader_create(
             "../src/shaders/vshader.glsl",
             "../src/shaders/fshader.glsl");
 
     glUseProgram(shader);
-    vao_bind(&vao);
+
+    voxren_init();
+    voxren_set_shader(shader);
 
     // vp matrices.
     clmMat4 view;
@@ -212,27 +130,7 @@ int main() {
             100.0f,  // far
             0.002f,  // speed
             0.04f);  // sense
-
-    // Lets make some cubes.
-    Object cube1;
-    Object cube2;
-    Object cube3;
-
-    obj_set_vbo(&cube1, vbo);
-    obj_set_vao(&cube1, &vao);
-
-    obj_set_vbo(&cube2, vbo);
-    obj_set_vao(&cube2, &vao);
-
-    obj_set_vbo(&cube3, vbo);
-    obj_set_vao(&cube3, &vao);
-
-    clmVec3 cubePos1 = { -2.0f, 3.0f, 7.0f };
-    clmVec3 cubePos2 = { 1.0f, 0.0f, 2.0f };
-    clmVec3 cubePos3 = { 2.0f, -6.0f, 4.0f };
-    obj_set_pos(&cube1, cubePos1);
-    obj_set_pos(&cube2, cubePos2);
-    obj_set_pos(&cube3, cubePos3);
+    
 
     bool running = true;
     while(running) {
@@ -287,13 +185,17 @@ int main() {
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        obj_render(&cube1, shader);
-        obj_render(&cube2, shader);
-        obj_render(&cube3, shader);
+        clmVec3 voxPos = { 0.0f, 0.0f, 0.0f };
+        voxren_submit_vox(voxPos);
+        voxPos[0] = 20.0f;
+        voxren_submit_vox(voxPos);
+        voxren_render_batch();
+
 
         glfwSwapBuffers(window);
     }
 
+    voxren_terminate();
     glfwTerminate();
     return 0;
 

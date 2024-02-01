@@ -25,10 +25,7 @@ void vao_ebo_data(
         VAO* vao,
         GLsizeiptr size,
         const GLvoid* data,
-        GLenum usage,
-        unsigned int indicesCount) {
-    vao->indicesCount = indicesCount;
-
+        GLenum usage) {
     vao_bind(vao);
 
     // Give ebo the data.
@@ -65,6 +62,5 @@ void vao_vertex_attrib(
     glEnableVertexAttribArray(index);
 
     vao_unbind();
-
 }
 
