@@ -8,6 +8,7 @@
 #include "clm.h"
 #include "camera.h"
 #include "voxel_renderer.h"
+#include <math.h>
 
 static int SCR_W = 1600;
 static int SCR_H = 900;
@@ -127,11 +128,16 @@ int main() {
     clmVec3 initCamPos = { 0.0f, 0.0f, 3.0f };
     cam_init_camera(&camera,
             initCamPos,
-            45.0f,   // fov
-            0.1f,    // near
-            500.0f,  // far
-            0.2f,  // speed
-            0.04f);  // sense
+            45.0f,  // fov
+            0.1f,   // near
+            500.0f, // far
+            0.01f,  // speed
+            0.05f);  // sense
+    
+    // Directional light.
+    clmVec3 lightPos = { 0.0f, 2.0f, 0.0f };
+    float moveRadius = 3.0f;
+    float lightSpeed = 0.2f;
     
     bool running = true;
     double lastTime = glfwGetTime();
@@ -155,6 +161,9 @@ int main() {
                 input_is_pressed(K_ESC)) {
             running = false;
         }
+
+        lightPos[0] = moveRadius * cos(currTime);
+        lightPos[2] = moveRadius * sin(currTime);
 
         // Move camera.
         camMove[0] = 0.0f; // forward/back 1/-1
@@ -196,21 +205,25 @@ int main() {
         glUniformMatrix4fv(projLoc,
                 1, GL_FALSE, proj);
 
+        unsigned int lightLoc = glGetUniformLocation(
+                shader, "lightPos");
+        glUniform3fv(lightLoc,
+                1, lightPos);
+
+        unsigned int camPosLoc = glGetUniformLocation(
+                shader, "camPos");
+        glUniform3fv(camPosLoc,
+                1, camera.position);
+
         // Render.
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        float boxWidth = 500.0f;
         clmVec3 voxPos = { 0.0f, 0.0f, 0.0f };
-        clmVec4 voxCol = { 1.0f, 0.5f, 0.2f, 1.0f };
-        for (float x = 0; x < boxWidth; x += 1.1f) {
-            for (float z = 0; z < boxWidth; z += 1.1f) {
-                voxPos[0] = x;
-                voxPos[1] = 0.0f;
-                voxPos[2] = z;
-                voxren_submit_vox(voxPos, voxCol);
-            }
-        }
+        clmVec3 voxCol = { 0.7f, 0.4f, 0.2f };
+        clmVec3 lightCol = { 1.0f, 1.0f, 1.0f };
+        voxren_submit_vox(voxPos, voxCol);
+        voxren_submit_vox(lightPos, lightCol);
 
         voxren_render_batch();
 
