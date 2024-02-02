@@ -50,7 +50,6 @@ GLFWwindow* init_window(
         const char* title, 
         int width, 
         int height) {
-
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -75,8 +74,8 @@ GLFWwindow* init_window(
 
     // Maximize window and set SCR_W, SCR_H
     glfwMaximizeWindow(window);
-    GLFWvidmode vidMode = 
-        *glfwGetVideoMode(glfwGetPrimaryMonitor());
+    GLFWvidmode vidMode;
+    vidMode = *glfwGetVideoMode(glfwGetPrimaryMonitor());
     SCR_W = vidMode.width;
     SCR_H = vidMode.height;
     CURS_LAST_X = SCR_W / 2;
@@ -88,7 +87,7 @@ GLFWwindow* init_window(
 int main() {
     // Create the window.
     GLFWwindow* window = init_window(
-            "Learning OpenGL", 
+            "Voxoff Engine", 
             SCR_W, 
             SCR_H);
 
@@ -102,17 +101,20 @@ int main() {
 
     glViewport(0, 0, SCR_W, SCR_H);
     glEnable(GL_DEPTH_TEST);
+
+    // Set callbacks.
     glfwSetFramebufferSizeCallback(window, 
             framebuffer_size_callback);
     glfwSetCursorPosCallback(window, 
             mouse_cursor_callback);
 
+    // Create shader.
     unsigned int shader = shader_create(
             "../src/shaders/vshader.glsl",
             "../src/shaders/fshader.glsl");
-
     glUseProgram(shader);
 
+    // Initialise voxel renderer.
     voxren_init();
     voxren_set_shader(shader);
 
@@ -120,20 +122,33 @@ int main() {
     clmMat4 view;
     clmMat4 proj;
 
-    // For our camera.
+    // Initialise camera.
     clmVec3 camMove = { 0.0f, 0.0f, 0.0f };
     clmVec3 initCamPos = { 0.0f, 0.0f, 3.0f };
     cam_init_camera(&camera,
             initCamPos,
             45.0f,   // fov
             0.1f,    // near
-            100.0f,  // far
-            0.002f,  // speed
+            500.0f,  // far
+            0.2f,  // speed
             0.04f);  // sense
     
-
     bool running = true;
+    double lastTime = glfwGetTime();
+    float reportFrameTimer = 0.0f;
+
     while(running) {
+        // Delta time.
+        double currTime = glfwGetTime();
+        float deltaTime = currTime - lastTime;
+        lastTime = currTime;
+        reportFrameTimer += deltaTime;
+
+        if (reportFrameTimer >= 1.0f) {
+            printf("frame time (ms): %.4f\n", deltaTime * 1000.0f);
+            reportFrameTimer = 0.0f;
+        }
+
         // Events and program exit.
         glfwPollEvents();
         if (glfwWindowShouldClose(window) || 
@@ -181,16 +196,23 @@ int main() {
         glUniformMatrix4fv(projLoc,
                 1, GL_FALSE, proj);
 
-        // Draw.
+        // Render.
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        float boxWidth = 500.0f;
         clmVec3 voxPos = { 0.0f, 0.0f, 0.0f };
-        voxren_submit_vox(voxPos);
-        voxPos[0] = 20.0f;
-        voxren_submit_vox(voxPos);
-        voxren_render_batch();
+        clmVec4 voxCol = { 1.0f, 0.5f, 0.2f, 1.0f };
+        for (float x = 0; x < boxWidth; x += 1.1f) {
+            for (float z = 0; z < boxWidth; z += 1.1f) {
+                voxPos[0] = x;
+                voxPos[1] = 0.0f;
+                voxPos[2] = z;
+                voxren_submit_vox(voxPos, voxCol);
+            }
+        }
 
+        voxren_render_batch();
 
         glfwSwapBuffers(window);
     }
