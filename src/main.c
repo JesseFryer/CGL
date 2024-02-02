@@ -125,19 +125,20 @@ int main() {
 
     // Initialise camera.
     clmVec3 camMove = { 0.0f, 0.0f, 0.0f };
-    clmVec3 initCamPos = { 0.0f, 0.0f, 3.0f };
+    clmVec3 initCamPos = { 0.0f, 10.0f, 0.0f };
     cam_init_camera(&camera,
             initCamPos,
             45.0f,  // fov
             0.1f,   // near
             500.0f, // far
-            0.01f,  // speed
-            0.05f);  // sense
+            0.0005f,  // speed
+            0.1f);  // sense
     
     // Directional light.
     clmVec3 lightPos = { 0.0f, 2.0f, 0.0f };
-    float moveRadius = 3.0f;
-    float lightSpeed = 0.2f;
+    float moveRadius = 2.0f;
+    float lightSpeed = 0.5f;
+    float centre = 5.0f;
     
     bool running = true;
     double lastTime = glfwGetTime();
@@ -162,8 +163,8 @@ int main() {
             running = false;
         }
 
-        lightPos[0] = moveRadius * cos(currTime);
-        lightPos[2] = moveRadius * sin(currTime);
+        lightPos[0] = centre + moveRadius * cos(currTime);
+        lightPos[2] = centre + moveRadius * sin(currTime);
 
         // Move camera.
         camMove[0] = 0.0f; // forward/back 1/-1
@@ -222,7 +223,15 @@ int main() {
         clmVec3 voxPos = { 0.0f, 0.0f, 0.0f };
         clmVec3 voxCol = { 0.7f, 0.4f, 0.2f };
         clmVec3 lightCol = { 1.0f, 1.0f, 1.0f };
-        voxren_submit_vox(voxPos, voxCol);
+
+        float boxWidth = 10.0f;
+        for (int x = 0.0f; x < boxWidth; x++) {
+            for (int z = 0.0f; z < boxWidth; z++) {
+                voxPos[0] = x;
+                voxPos[2] = z;
+                voxren_submit_vox(voxPos, voxCol);
+            }
+        }
         voxren_submit_vox(lightPos, lightCol);
 
         voxren_render_batch();

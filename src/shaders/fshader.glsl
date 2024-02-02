@@ -15,7 +15,7 @@ void main() {
 
     vec3 diffuse = diffuseStr * lightColour;
 
-    float specScalar = 0.5;
+    float specScalar = 1.0;
     vec3 specular = specScalar * specularStr * lightColour;
 
     fragColour = vec4(

@@ -23,7 +23,7 @@ void main() {
 
     vec3 viewDir = normalize(camPos - aPosition);
     vec3 reflectDir = reflect(-diffuseDir, aNormal);
-    specularStr = pow(max(dot(viewDir, reflectDir), 0.0), 64);
+    specularStr = pow(max(dot(viewDir, reflectDir), 0.0), 2);
 
     gl_Position = proj * view * vec4(aPosition, 1.0);
 }
