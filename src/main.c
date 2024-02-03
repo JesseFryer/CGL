@@ -138,7 +138,7 @@ int main() {
     
     // Directional light.
     clmVec3 lightPos = { 0.0f, 8.0f, 0.0f };
-    float moveRadius = 12.0f;
+    float moveRadius = 8.0f;
     float lightSpeed = 0.5f;
     float centre = 0.0f;
     
@@ -220,7 +220,7 @@ int main() {
 
         shader_use(shader);
         voxren_submit_vox(voxPos, voxSize, voxCol);
-        voxPos[1] = 10.0f;
+        voxPos[1] = 5.0f;
         voxSize[0] = 5.0f;
         voxSize[1] = 5.0f;
         voxSize[2] = 5.0f;
