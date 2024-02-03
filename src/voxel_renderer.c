@@ -70,8 +70,8 @@ void voxren_init() {
         indices[i + 2] = offset + 2;
 
         indices[i + 3] = offset + 2;
-        indices[i + 4] = offset + 3;
-        indices[i + 5] = offset + 0;
+        indices[i + 4] = offset + 0;
+        indices[i + 5] = offset + 3;
 
         offset += 4;
     }
@@ -86,7 +86,10 @@ void voxren_init() {
 
 }
 
-void voxren_submit_vox(clmVec3 position, clmVec4 colour) {
+void voxren_submit_vox(
+        clmVec3 position, 
+        clmVec3 size,
+        clmVec4 colour) {
     // For a voxel, 24 vertices are used, 4 for each rectangular face.
     // They are added in anti-clockwise order, so bottom left/right then
     // top right/left.
@@ -101,6 +104,10 @@ void voxren_submit_vox(clmVec3 position, clmVec4 colour) {
     float y = position[1];
     float z = position[2];
 
+    float width  = size[0] * 0.5f;
+    float height = size[1] * 0.5f;
+    float depth  = size[2] * 0.5f;
+
     float r = colour[0];
     float g = colour[1];
     float b = colour[2];
@@ -108,9 +115,9 @@ void voxren_submit_vox(clmVec3 position, clmVec4 colour) {
 
     // Front face of voxel.
     // Bottom-left.
-    s_rData.vBufferPtr->position[0] = -0.5f + x;
-    s_rData.vBufferPtr->position[1] = -0.5f + y;
-    s_rData.vBufferPtr->position[2] =  0.5f + z;
+    s_rData.vBufferPtr->position[0] = -width  + x;
+    s_rData.vBufferPtr->position[1] = -height + y;
+    s_rData.vBufferPtr->position[2] =  depth  + z;
     s_rData.vBufferPtr->colour[0] = r;
     s_rData.vBufferPtr->colour[1] = g;
     s_rData.vBufferPtr->colour[2] = b;
@@ -120,9 +127,9 @@ void voxren_submit_vox(clmVec3 position, clmVec4 colour) {
     s_rData.vBufferPtr->normal[2] = 1.0f;
     s_rData.vBufferPtr++;
     // Bottom-right.
-    s_rData.vBufferPtr->position[0] =  0.5f + x;
-    s_rData.vBufferPtr->position[1] = -0.5f + y;
-    s_rData.vBufferPtr->position[2] =  0.5f + z;
+    s_rData.vBufferPtr->position[0] =  width  + x;
+    s_rData.vBufferPtr->position[1] = -height + y;
+    s_rData.vBufferPtr->position[2] =  depth  + z;
     s_rData.vBufferPtr->colour[0] = r;
     s_rData.vBufferPtr->colour[1] = g;
     s_rData.vBufferPtr->colour[2] = b;
@@ -132,9 +139,9 @@ void voxren_submit_vox(clmVec3 position, clmVec4 colour) {
     s_rData.vBufferPtr->normal[2] = 1.0f;
     s_rData.vBufferPtr++;
     // Top-right.
-    s_rData.vBufferPtr->position[0] =  0.5f + x;
-    s_rData.vBufferPtr->position[1] =  0.5f + y;
-    s_rData.vBufferPtr->position[2] =  0.5f + z;
+    s_rData.vBufferPtr->position[0] =  width  + x;
+    s_rData.vBufferPtr->position[1] =  height + y;
+    s_rData.vBufferPtr->position[2] =  depth  + z;
     s_rData.vBufferPtr->colour[0] = r;
     s_rData.vBufferPtr->colour[1] = g;
     s_rData.vBufferPtr->colour[2] = b;
@@ -144,9 +151,9 @@ void voxren_submit_vox(clmVec3 position, clmVec4 colour) {
     s_rData.vBufferPtr->normal[2] = 1.0f;
     s_rData.vBufferPtr++;
     // Top-left.
-    s_rData.vBufferPtr->position[0] = -0.5f + x;
-    s_rData.vBufferPtr->position[1] =  0.5f + y;
-    s_rData.vBufferPtr->position[2] =  0.5f + z;
+    s_rData.vBufferPtr->position[0] = -width  + x;
+    s_rData.vBufferPtr->position[1] =  height + y;
+    s_rData.vBufferPtr->position[2] =  depth  + z;
     s_rData.vBufferPtr->colour[0] = r;
     s_rData.vBufferPtr->colour[1] = g;
     s_rData.vBufferPtr->colour[2] = b;
@@ -159,9 +166,9 @@ void voxren_submit_vox(clmVec3 position, clmVec4 colour) {
 
     // Right face of voxel.
     // Bottom-left.
-    s_rData.vBufferPtr->position[0] =  0.5f + x;
-    s_rData.vBufferPtr->position[1] = -0.5f + y;
-    s_rData.vBufferPtr->position[2] =  0.5f + z;
+    s_rData.vBufferPtr->position[0] =  width  + x;
+    s_rData.vBufferPtr->position[1] = -height + y;
+    s_rData.vBufferPtr->position[2] =  depth  + z;
     s_rData.vBufferPtr->colour[0] = r;
     s_rData.vBufferPtr->colour[1] = g;
     s_rData.vBufferPtr->colour[2] = b;
@@ -171,9 +178,9 @@ void voxren_submit_vox(clmVec3 position, clmVec4 colour) {
     s_rData.vBufferPtr->normal[2] = 0.0f;
     s_rData.vBufferPtr++;
     // Bottom-right.
-    s_rData.vBufferPtr->position[0] =  0.5f + x;
-    s_rData.vBufferPtr->position[1] = -0.5f + y;
-    s_rData.vBufferPtr->position[2] = -0.5f + z;
+    s_rData.vBufferPtr->position[0] =  width  + x;
+    s_rData.vBufferPtr->position[1] = -height + y;
+    s_rData.vBufferPtr->position[2] = -depth  + z;
     s_rData.vBufferPtr->colour[0] = r;
     s_rData.vBufferPtr->colour[1] = g;
     s_rData.vBufferPtr->colour[2] = b;
@@ -183,9 +190,9 @@ void voxren_submit_vox(clmVec3 position, clmVec4 colour) {
     s_rData.vBufferPtr->normal[2] = 0.0f;
     s_rData.vBufferPtr++;
     // Top-right.
-    s_rData.vBufferPtr->position[0] =  0.5f + x;
-    s_rData.vBufferPtr->position[1] =  0.5f + y;
-    s_rData.vBufferPtr->position[2] = -0.5f + z;
+    s_rData.vBufferPtr->position[0] =  width  + x;
+    s_rData.vBufferPtr->position[1] =  height + y;
+    s_rData.vBufferPtr->position[2] = -depth  + z;
     s_rData.vBufferPtr->colour[0] = r;
     s_rData.vBufferPtr->colour[1] = g;
     s_rData.vBufferPtr->colour[2] = b;
@@ -195,9 +202,9 @@ void voxren_submit_vox(clmVec3 position, clmVec4 colour) {
     s_rData.vBufferPtr->normal[2] = 0.0f;
     s_rData.vBufferPtr++;
     // Top-left.
-    s_rData.vBufferPtr->position[0] =  0.5f + x;
-    s_rData.vBufferPtr->position[1] =  0.5f + y;
-    s_rData.vBufferPtr->position[2] =  0.5f + z;
+    s_rData.vBufferPtr->position[0] = width  + x;
+    s_rData.vBufferPtr->position[1] = height + y;
+    s_rData.vBufferPtr->position[2] = depth  + z;
     s_rData.vBufferPtr->colour[0] = r;
     s_rData.vBufferPtr->colour[1] = g;
     s_rData.vBufferPtr->colour[2] = b;
@@ -210,9 +217,9 @@ void voxren_submit_vox(clmVec3 position, clmVec4 colour) {
 
     // Back face of voxel.
     // Bottom-left.
-    s_rData.vBufferPtr->position[0] =  0.5f + x;
-    s_rData.vBufferPtr->position[1] = -0.5f + y;
-    s_rData.vBufferPtr->position[2] = -0.5f + z;
+    s_rData.vBufferPtr->position[0] =  width  + x;
+    s_rData.vBufferPtr->position[1] = -height + y;
+    s_rData.vBufferPtr->position[2] = -depth  + z;
     s_rData.vBufferPtr->colour[0] = r;
     s_rData.vBufferPtr->colour[1] = g;
     s_rData.vBufferPtr->colour[2] = b;
@@ -222,9 +229,9 @@ void voxren_submit_vox(clmVec3 position, clmVec4 colour) {
     s_rData.vBufferPtr->normal[2] = -1.0f;
     s_rData.vBufferPtr++;
     // Bottom-right.
-    s_rData.vBufferPtr->position[0] = -0.5f + x;
-    s_rData.vBufferPtr->position[1] = -0.5f + y;
-    s_rData.vBufferPtr->position[2] = -0.5f + z;
+    s_rData.vBufferPtr->position[0] = -width  + x;
+    s_rData.vBufferPtr->position[1] = -height + y;
+    s_rData.vBufferPtr->position[2] = -depth  + z;
     s_rData.vBufferPtr->colour[0] = r;
     s_rData.vBufferPtr->colour[1] = g;
     s_rData.vBufferPtr->colour[2] = b;
@@ -234,9 +241,9 @@ void voxren_submit_vox(clmVec3 position, clmVec4 colour) {
     s_rData.vBufferPtr->normal[2] = -1.0f;
     s_rData.vBufferPtr++;
     // Top-right.
-    s_rData.vBufferPtr->position[0] = -0.5f + x;
-    s_rData.vBufferPtr->position[1] =  0.5f + y;
-    s_rData.vBufferPtr->position[2] = -0.5f + z;
+    s_rData.vBufferPtr->position[0] = -width  + x;
+    s_rData.vBufferPtr->position[1] =  height + y;
+    s_rData.vBufferPtr->position[2] = -depth  + z;
     s_rData.vBufferPtr->colour[0] = r;
     s_rData.vBufferPtr->colour[1] = g;
     s_rData.vBufferPtr->colour[2] = b;
@@ -246,9 +253,9 @@ void voxren_submit_vox(clmVec3 position, clmVec4 colour) {
     s_rData.vBufferPtr->normal[2] = -1.0f;
     s_rData.vBufferPtr++;
     // Top-left.
-    s_rData.vBufferPtr->position[0] =  0.5f + x;
-    s_rData.vBufferPtr->position[1] =  0.5f + y;
-    s_rData.vBufferPtr->position[2] = -0.5f + z;
+    s_rData.vBufferPtr->position[0] =  width  + x;
+    s_rData.vBufferPtr->position[1] =  height + y;
+    s_rData.vBufferPtr->position[2] = -depth  + z;
     s_rData.vBufferPtr->colour[0] = r;
     s_rData.vBufferPtr->colour[1] = g;
     s_rData.vBufferPtr->colour[2] = b;
@@ -261,9 +268,9 @@ void voxren_submit_vox(clmVec3 position, clmVec4 colour) {
 
     // Left face of voxel.
     // Bottom-left.
-    s_rData.vBufferPtr->position[0] = -0.5f + x;
-    s_rData.vBufferPtr->position[1] = -0.5f + y;
-    s_rData.vBufferPtr->position[2] = -0.5f + z;
+    s_rData.vBufferPtr->position[0] = -width  + x;
+    s_rData.vBufferPtr->position[1] = -height + y;
+    s_rData.vBufferPtr->position[2] = -depth  + z;
     s_rData.vBufferPtr->colour[0] = r;
     s_rData.vBufferPtr->colour[1] = g;
     s_rData.vBufferPtr->colour[2] = b;
@@ -273,9 +280,9 @@ void voxren_submit_vox(clmVec3 position, clmVec4 colour) {
     s_rData.vBufferPtr->normal[2] =  0.0f;
     s_rData.vBufferPtr++;
     // Bottom-right.
-    s_rData.vBufferPtr->position[0] = -0.5f + x;
-    s_rData.vBufferPtr->position[1] = -0.5f + y;
-    s_rData.vBufferPtr->position[2] =  0.5f + z;
+    s_rData.vBufferPtr->position[0] = -width  + x;
+    s_rData.vBufferPtr->position[1] = -height + y;
+    s_rData.vBufferPtr->position[2] =  depth  + z;
     s_rData.vBufferPtr->colour[0] = r;
     s_rData.vBufferPtr->colour[1] = g;
     s_rData.vBufferPtr->colour[2] = b;
@@ -285,9 +292,9 @@ void voxren_submit_vox(clmVec3 position, clmVec4 colour) {
     s_rData.vBufferPtr->normal[2] =  0.0f;
     s_rData.vBufferPtr++;
     // Top-right.
-    s_rData.vBufferPtr->position[0] = -0.5f + x;
-    s_rData.vBufferPtr->position[1] =  0.5f + y;
-    s_rData.vBufferPtr->position[2] =  0.5f + z;
+    s_rData.vBufferPtr->position[0] = -width  + x;
+    s_rData.vBufferPtr->position[1] =  height + y;
+    s_rData.vBufferPtr->position[2] =  depth  + z;
     s_rData.vBufferPtr->colour[0] = r;
     s_rData.vBufferPtr->colour[1] = g;
     s_rData.vBufferPtr->colour[2] = b;
@@ -297,9 +304,9 @@ void voxren_submit_vox(clmVec3 position, clmVec4 colour) {
     s_rData.vBufferPtr->normal[2] =  0.0f;
     s_rData.vBufferPtr++;
     // Top-left.
-    s_rData.vBufferPtr->position[0] = -0.5f + x;
-    s_rData.vBufferPtr->position[1] =  0.5f + y;
-    s_rData.vBufferPtr->position[2] = -0.5f + z;
+    s_rData.vBufferPtr->position[0] = -width  + x;
+    s_rData.vBufferPtr->position[1] =  height + y;
+    s_rData.vBufferPtr->position[2] = -depth  + z;
     s_rData.vBufferPtr->colour[0] = r;
     s_rData.vBufferPtr->colour[1] = g;
     s_rData.vBufferPtr->colour[2] = b;
@@ -312,9 +319,9 @@ void voxren_submit_vox(clmVec3 position, clmVec4 colour) {
 
     // Bottom face of voxel.
     // Bottom-left.
-    s_rData.vBufferPtr->position[0] = -0.5f + x;
-    s_rData.vBufferPtr->position[1] = -0.5f + y;
-    s_rData.vBufferPtr->position[2] = -0.5f + z;
+    s_rData.vBufferPtr->position[0] = -width  + x;
+    s_rData.vBufferPtr->position[1] = -height + y;
+    s_rData.vBufferPtr->position[2] = -depth  + z;
     s_rData.vBufferPtr->colour[0] = r;
     s_rData.vBufferPtr->colour[1] = g;
     s_rData.vBufferPtr->colour[2] = b;
@@ -324,9 +331,9 @@ void voxren_submit_vox(clmVec3 position, clmVec4 colour) {
     s_rData.vBufferPtr->normal[2] =  0.0f;
     s_rData.vBufferPtr++;
     // Bottom-right.
-    s_rData.vBufferPtr->position[0] =  0.5f + x;
-    s_rData.vBufferPtr->position[1] = -0.5f + y;
-    s_rData.vBufferPtr->position[2] = -0.5f + z;
+    s_rData.vBufferPtr->position[0] =  width  + x;
+    s_rData.vBufferPtr->position[1] = -height + y;
+    s_rData.vBufferPtr->position[2] = -depth  + z;
     s_rData.vBufferPtr->colour[0] = r;
     s_rData.vBufferPtr->colour[1] = g;
     s_rData.vBufferPtr->colour[2] = b;
@@ -336,9 +343,9 @@ void voxren_submit_vox(clmVec3 position, clmVec4 colour) {
     s_rData.vBufferPtr->normal[2] =  0.0f;
     s_rData.vBufferPtr++;
     // Top-right.
-    s_rData.vBufferPtr->position[0] =  0.5f + x;
-    s_rData.vBufferPtr->position[1] = -0.5f + y;
-    s_rData.vBufferPtr->position[2] =  0.5f + z;
+    s_rData.vBufferPtr->position[0] =  width  + x;
+    s_rData.vBufferPtr->position[1] = -height + y;
+    s_rData.vBufferPtr->position[2] =  depth  + z;
     s_rData.vBufferPtr->colour[0] = r;
     s_rData.vBufferPtr->colour[1] = g;
     s_rData.vBufferPtr->colour[2] = b;
@@ -348,9 +355,9 @@ void voxren_submit_vox(clmVec3 position, clmVec4 colour) {
     s_rData.vBufferPtr->normal[2] =  0.0f;
     s_rData.vBufferPtr++;
     // Top-left.
-    s_rData.vBufferPtr->position[0] = -0.5f + x;
-    s_rData.vBufferPtr->position[1] = -0.5f + y;
-    s_rData.vBufferPtr->position[2] =  0.5f + z;
+    s_rData.vBufferPtr->position[0] = -width  + x;
+    s_rData.vBufferPtr->position[1] = -height + y;
+    s_rData.vBufferPtr->position[2] =  depth  + z;
     s_rData.vBufferPtr->colour[0] = r;
     s_rData.vBufferPtr->colour[1] = g;
     s_rData.vBufferPtr->colour[2] = b;
@@ -363,9 +370,9 @@ void voxren_submit_vox(clmVec3 position, clmVec4 colour) {
 
     // Top face of voxel.
     // Bottom-left.
-    s_rData.vBufferPtr->position[0] = -0.5f + x;
-    s_rData.vBufferPtr->position[1] =  0.5f + y;
-    s_rData.vBufferPtr->position[2] =  0.5f + z;
+    s_rData.vBufferPtr->position[0] = -width  + x;
+    s_rData.vBufferPtr->position[1] =  height + y;
+    s_rData.vBufferPtr->position[2] =  depth  + z;
     s_rData.vBufferPtr->colour[0] = r;
     s_rData.vBufferPtr->colour[1] = g;
     s_rData.vBufferPtr->colour[2] = b;
@@ -375,9 +382,9 @@ void voxren_submit_vox(clmVec3 position, clmVec4 colour) {
     s_rData.vBufferPtr->normal[2] = 0.0f;
     s_rData.vBufferPtr++;
     // Bottom-right.
-    s_rData.vBufferPtr->position[0] =  0.5f + x;
-    s_rData.vBufferPtr->position[1] =  0.5f + y;
-    s_rData.vBufferPtr->position[2] =  0.5f + z;
+    s_rData.vBufferPtr->position[0] =  width  + x;
+    s_rData.vBufferPtr->position[1] =  height + y;
+    s_rData.vBufferPtr->position[2] =  depth  + z;
     s_rData.vBufferPtr->colour[0] = r;
     s_rData.vBufferPtr->colour[1] = g;
     s_rData.vBufferPtr->colour[2] = b;
@@ -387,9 +394,9 @@ void voxren_submit_vox(clmVec3 position, clmVec4 colour) {
     s_rData.vBufferPtr->normal[2] = 0.0f;
     s_rData.vBufferPtr++;
     // Top-right.
-    s_rData.vBufferPtr->position[0] =  0.5f + x;
-    s_rData.vBufferPtr->position[1] =  0.5f + y;
-    s_rData.vBufferPtr->position[2] = -0.5f + z;
+    s_rData.vBufferPtr->position[0] =  width  + x;
+    s_rData.vBufferPtr->position[1] =  height + y;
+    s_rData.vBufferPtr->position[2] = -depth  + z;
     s_rData.vBufferPtr->colour[0] = r;
     s_rData.vBufferPtr->colour[1] = g;
     s_rData.vBufferPtr->colour[2] = b;
@@ -399,9 +406,9 @@ void voxren_submit_vox(clmVec3 position, clmVec4 colour) {
     s_rData.vBufferPtr->normal[2] = 0.0f;
     s_rData.vBufferPtr++;
     // Top-left.
-    s_rData.vBufferPtr->position[0] = -0.5f + x;
-    s_rData.vBufferPtr->position[1] =  0.5f + y;
-    s_rData.vBufferPtr->position[2] = -0.5f + z;
+    s_rData.vBufferPtr->position[0] = -width  + x;
+    s_rData.vBufferPtr->position[1] =  height + y;
+    s_rData.vBufferPtr->position[2] = -depth  + z;
     s_rData.vBufferPtr->colour[0] = r;
     s_rData.vBufferPtr->colour[1] = g;
     s_rData.vBufferPtr->colour[2] = b;

@@ -28,9 +28,12 @@ void voxren_init();
 
 /* voxren_add_vox
  * --------------
- * Submit a voxel to the batch for rendering.
+ * Submit a voxel to the batch for rendering. Size is width/height/depth.
  */
-void voxren_submit_vox(clmVec3 position, clmVec4 colour);
+void voxren_submit_vox(
+        clmVec3 position, 
+        clmVec3 size,
+        clmVec4 colour);
 
 /* voxren_render_batch
  * -------------------

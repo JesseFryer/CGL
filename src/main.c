@@ -136,9 +136,9 @@ int main() {
     
     // Directional light.
     clmVec3 lightPos = { 0.0f, 2.0f, 0.0f };
-    float moveRadius = 2.0f;
+    float moveRadius = 12.0f;
     float lightSpeed = 0.5f;
-    float centre = 5.0f;
+    float centre = 0.0f;
     
     bool running = true;
     double lastTime = glfwGetTime();
@@ -207,32 +207,29 @@ int main() {
                 1, GL_FALSE, proj);
 
         unsigned int lightLoc = glGetUniformLocation(
-                shader, "lightPos");
+                shader, "vLightPos");
         glUniform3fv(lightLoc,
                 1, lightPos);
 
         unsigned int camPosLoc = glGetUniformLocation(
-                shader, "camPos");
+                shader, "vCamPos");
         glUniform3fv(camPosLoc,
                 1, camera.position);
 
         // Render.
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         clmVec3 voxPos = { 0.0f, 0.0f, 0.0f };
-        clmVec3 voxCol = { 0.7f, 0.4f, 0.2f };
-        clmVec3 lightCol = { 1.0f, 1.0f, 1.0f };
 
-        float boxWidth = 10.0f;
-        for (int x = 0.0f; x < boxWidth; x++) {
-            for (int z = 0.0f; z < boxWidth; z++) {
-                voxPos[0] = x;
-                voxPos[2] = z;
-                voxren_submit_vox(voxPos, voxCol);
-            }
-        }
-        voxren_submit_vox(lightPos, lightCol);
+        clmVec4 voxCol = { 0.2f, 0.3f, 1.0f, 1.0f };
+        clmVec4 lightCol = { 1.0f, 1.0f, 1.0f, 1.0f };
+
+        clmVec3 voxSize = { 50.0f, 0.5f, 50.0f };
+        clmVec3 lightSize = { 0.5f, 0.5f, 0.5f };
+
+        voxren_submit_vox(voxPos, voxSize, voxCol);
+        voxren_submit_vox(lightPos, lightSize, lightCol);
 
         voxren_render_batch();
 

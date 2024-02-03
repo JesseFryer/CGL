@@ -1,29 +1,28 @@
 #version 330 core
-layout (location = 0) in vec3 aPosition;
-layout (location = 1) in vec4 aColour;
-layout (location = 2) in vec3 aNormal;
+layout (location = 0) in vec3 vPos;
+layout (location = 1) in vec4 vColour;
+layout (location = 2) in vec3 vNormal;
 
 uniform mat4 view;
 uniform mat4 proj;
 
-uniform vec3 lightPos;
-uniform vec3 camPos;
+uniform vec3 vLightPos;
+uniform vec3 vCamPos;
 
-out vec3 objColour;
-out float alpha;
-out float diffuseStr;
-out float specularStr;
+out vec3 fPos;
+out vec3 fLightPos;
+out vec3 fCamPos;
+out vec3 fNormal;
+out vec3 fObjColour;
+out float fObjAlpha;
 
 void main() {
-    objColour = vec3(aColour.x, aColour.y, aColour.z);
-    alpha = aColour.w;
+    fPos = vPos;
+    fLightPos = vLightPos;
+    fCamPos = vCamPos;
+    fNormal = vNormal;
+    fObjColour = vec3(vColour.x, vColour.y, vColour.z);
+    fObjAlpha = vColour.w;
 
-    vec3 diffuseDir = normalize(lightPos - aPosition);
-    diffuseStr = max(dot(diffuseDir, aNormal), 0.0);
-
-    vec3 viewDir = normalize(camPos - aPosition);
-    vec3 reflectDir = reflect(-diffuseDir, aNormal);
-    specularStr = pow(max(dot(viewDir, reflectDir), 0.0), 2);
-
-    gl_Position = proj * view * vec4(aPosition, 1.0);
+    gl_Position = proj * view * vec4(vPos, 1.0);
 }
