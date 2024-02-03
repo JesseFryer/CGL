@@ -113,11 +113,13 @@ int main() {
     unsigned int shader = shader_create(
             "../src/shaders/vshader.glsl",
             "../src/shaders/fshader.glsl");
-    glUseProgram(shader);
+
+    unsigned int lightShader = shader_create(
+            "../src/shaders/vlightshader.glsl",
+            "../src/shaders/flightshader.glsl");
 
     // Initialise voxel renderer.
     voxren_init();
-    voxren_set_shader(shader);
 
     // vp matrices.
     clmMat4 view;
@@ -131,11 +133,11 @@ int main() {
             45.0f,  // fov
             0.1f,   // near
             500.0f, // far
-            0.0005f,  // speed
+            0.005f,  // speed
             0.1f);  // sense
     
     // Directional light.
-    clmVec3 lightPos = { 0.0f, 2.0f, 0.0f };
+    clmVec3 lightPos = { 0.0f, 8.0f, 0.0f };
     float moveRadius = 12.0f;
     float lightSpeed = 0.5f;
     float centre = 0.0f;
@@ -196,15 +198,14 @@ int main() {
                 (float) SCR_W / (float) SCR_H,
                 proj);
 
+        glUseProgram(shader);
         unsigned int viewLoc = glGetUniformLocation(
                 shader, "view");
-        glUniformMatrix4fv(viewLoc,
-                1, GL_FALSE, view);
+        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, view);
 
         unsigned int projLoc = glGetUniformLocation(
                 shader, "proj");
-        glUniformMatrix4fv(projLoc,
-                1, GL_FALSE, proj);
+        glUniformMatrix4fv(projLoc, 1, GL_FALSE, proj);
 
         unsigned int lightLoc = glGetUniformLocation(
                 shader, "vLightPos");
@@ -216,8 +217,14 @@ int main() {
         glUniform3fv(camPosLoc,
                 1, camera.position);
 
+        glUseProgram(lightShader);
+        viewLoc = glGetUniformLocation(lightShader, "view");
+        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, view);
+        projLoc = glGetUniformLocation(lightShader, "proj");
+        glUniformMatrix4fv(projLoc, 1, GL_FALSE, proj);
+
         // Render.
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         clmVec3 voxPos = { 0.0f, 0.0f, 0.0f };
@@ -226,11 +233,22 @@ int main() {
         clmVec4 lightCol = { 1.0f, 1.0f, 1.0f, 1.0f };
 
         clmVec3 voxSize = { 50.0f, 0.5f, 50.0f };
-        clmVec3 lightSize = { 0.5f, 0.5f, 0.5f };
+        clmVec3 lightSize = { 0.25f, 0.25f, 0.25f };
 
+        voxren_set_shader(shader);
         voxren_submit_vox(voxPos, voxSize, voxCol);
-        voxren_submit_vox(lightPos, lightSize, lightCol);
+        voxPos[1] = 10.0f;
+        voxSize[0] = 5.0f;
+        voxSize[1] = 5.0f;
+        voxSize[2] = 5.0f;
+        voxCol[0] = 0.0f;
+        voxCol[1] = 1.0f;
+        voxCol[2] = 0.0f;
+        voxren_submit_vox(voxPos, voxSize, voxCol);
+        voxren_render_batch();
 
+        voxren_set_shader(lightShader);
+        voxren_submit_vox(lightPos, lightSize, lightCol);
         voxren_render_batch();
 
         glfwSwapBuffers(window);

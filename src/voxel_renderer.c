@@ -424,6 +424,7 @@ void voxren_submit_vox(
 void voxren_render_batch() {
     // Bind vao and use shader.
     vao_bind(&s_rData.vao);
+    glUseProgram(s_rData.shader);
 
     // Bind vbo and supply vertices.
     GLsizeiptr size = 

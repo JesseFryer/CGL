@@ -22,7 +22,7 @@ void main() {
     float specScalar = 0.5;
     vec3 viewDir = normalize(fCamPos - fPos);
     vec3 reflectDir = reflect(-diffuseDir, fNormal);
-    float specularStr = pow(max(dot(viewDir, reflectDir), 0.0), 32);
+    float specularStr = pow(max(dot(viewDir, reflectDir), 0.0), 128);
     vec3 specular = specScalar * specularStr * lightColour;
 
     vec3 result = (ambient + diffuse + specular) * fObjColour;
