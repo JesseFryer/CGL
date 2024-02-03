@@ -8,7 +8,6 @@
 typedef struct RenderData {
     VAO          vao;
     unsigned int vbo;
-    unsigned int shader;
     Vertex*      vBuffer;
     Vertex*      vBufferPtr;
     GLsizei      indicesCount;
@@ -424,7 +423,6 @@ void voxren_submit_vox(
 void voxren_render_batch() {
     // Bind vao and use shader.
     vao_bind(&s_rData.vao);
-    glUseProgram(s_rData.shader);
 
     // Bind vbo and supply vertices.
     GLsizeiptr size = 
@@ -446,10 +444,6 @@ void voxren_render_batch() {
     // Reset indices count and vBufferPtr.
     s_rData.indicesCount = 0;
     s_rData.vBufferPtr = s_rData.vBuffer;
-}
-
-void voxren_set_shader(unsigned int shader) {
-    s_rData.shader = shader;
 }
 
 void voxren_terminate() {

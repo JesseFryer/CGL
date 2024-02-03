@@ -41,13 +41,6 @@ void voxren_submit_vox(
  */
 void voxren_render_batch();
 
-/* voxren_set_shader
- * -----------------
- * Set the currently used shader. If no shader is set shit won't work.
- * TODO: make a default shader be set in voxren_init.
- */
-void voxren_set_shader(unsigned int shader);
-
 /* voxren_terminate
  * ----------------
  * Free resources used by renderer.

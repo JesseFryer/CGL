@@ -111,12 +111,12 @@ int main() {
 
     // Create shader.
     unsigned int shader = shader_create(
-            "../src/shaders/vshader.glsl",
-            "../src/shaders/fshader.glsl");
+            "vshader.glsl",
+            "fshader.glsl");
 
     unsigned int lightShader = shader_create(
-            "../src/shaders/vlightshader.glsl",
-            "../src/shaders/flightshader.glsl");
+            "vlightshader.glsl",
+            "flightshader.glsl");
 
     // Initialise voxel renderer.
     voxren_init();
@@ -198,30 +198,13 @@ int main() {
                 (float) SCR_W / (float) SCR_H,
                 proj);
 
-        glUseProgram(shader);
-        unsigned int viewLoc = glGetUniformLocation(
-                shader, "view");
-        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, view);
-
-        unsigned int projLoc = glGetUniformLocation(
-                shader, "proj");
-        glUniformMatrix4fv(projLoc, 1, GL_FALSE, proj);
-
-        unsigned int lightLoc = glGetUniformLocation(
-                shader, "vLightPos");
-        glUniform3fv(lightLoc,
-                1, lightPos);
-
-        unsigned int camPosLoc = glGetUniformLocation(
-                shader, "vCamPos");
-        glUniform3fv(camPosLoc,
-                1, camera.position);
-
-        glUseProgram(lightShader);
-        viewLoc = glGetUniformLocation(lightShader, "view");
-        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, view);
-        projLoc = glGetUniformLocation(lightShader, "proj");
-        glUniformMatrix4fv(projLoc, 1, GL_FALSE, proj);
+        // Set uniforms.
+        shader_set_uniform_vec3(shader, "vLightPos", lightPos);
+        shader_set_uniform_vec3(shader, "vCamPos", camera.position);
+        shader_set_uniform_mat4(shader, "view", view);
+        shader_set_uniform_mat4(shader, "proj", proj);
+        shader_set_uniform_mat4(lightShader, "view", view);
+        shader_set_uniform_mat4(lightShader, "proj", proj);
 
         // Render.
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
@@ -235,7 +218,7 @@ int main() {
         clmVec3 voxSize = { 50.0f, 0.5f, 50.0f };
         clmVec3 lightSize = { 0.25f, 0.25f, 0.25f };
 
-        voxren_set_shader(shader);
+        shader_use(shader);
         voxren_submit_vox(voxPos, voxSize, voxCol);
         voxPos[1] = 10.0f;
         voxSize[0] = 5.0f;
@@ -247,7 +230,7 @@ int main() {
         voxren_submit_vox(voxPos, voxSize, voxCol);
         voxren_render_batch();
 
-        voxren_set_shader(lightShader);
+        shader_use(lightShader);
         voxren_submit_vox(lightPos, lightSize, lightCol);
         voxren_render_batch();
 
