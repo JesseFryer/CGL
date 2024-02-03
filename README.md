@@ -7,4 +7,4 @@ Vector and matrix math is handwritten and can be found either in this project
 or at https://github.com/JesseFryer/clm
 
 # PHONG Lighting
-![](https://github.com/JesseFryer/CGL/blob/main/gifs/showcase1.gifs)
+![](https://github.com/JesseFryer/CGL/blob/main/gifs/showcase1.gif)
