@@ -13,11 +13,13 @@
 #define MAX_INDICES       (MAX_VOXELS * INDICES_PER_VOXEL)
 
 #include "clm.h"
+#include "texture.h"
 
 typedef struct Vertex {
-    float position[3]; // x, y, z
-    float colour[4];   // r, g, b, a
-    float normal[3];   // x, y, z
+    float position[3];
+    float colour[4];
+    float normal[3];
+    float texture[2];
 } Vertex;
 
 /* voxren_init
@@ -33,7 +35,8 @@ void voxren_init();
 void voxren_submit_vox(
         clmVec3 position, 
         clmVec3 size,
-        clmVec4 colour);
+        clmVec4 colour,
+        VoxelTex* tex);
 
 /* voxren_render_batch
  * -------------------

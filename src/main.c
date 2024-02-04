@@ -8,6 +8,7 @@
 #include "clm.h"
 #include "camera.h"
 #include "voxel_renderer.h"
+#include "texture.h"
 #include <math.h>
 
 static int SCR_W = 1600;
@@ -85,6 +86,13 @@ GLFWwindow* init_window(
 }
 
 int main() {
+    // Testing out the sprite atlas thingy.
+    SpriteAtlas atlas;
+    VoxelTex voxTex;
+
+    tex_init_atlas(&atlas, 128, 128, 16, 16);
+    tex_create_voxel_tex(&voxTex, &atlas, 8, 1, 2);
+
     // Create the window.
     GLFWwindow* window = init_window(
             "Voxoff Engine", 
@@ -218,7 +226,7 @@ int main() {
         clmVec3 lightSize = { 0.25f, 0.25f, 0.25f };
 
         shader_use(shader);
-        voxren_submit_vox(voxPos, voxSize, voxCol);
+        voxren_submit_vox(voxPos, voxSize, voxCol, &voxTex);
         voxPos[1] = 5.0f;
         voxSize[0] = 5.0f;
         voxSize[1] = 5.0f;
@@ -226,11 +234,11 @@ int main() {
         voxCol[0] = 0.0f;
         voxCol[1] = 1.0f;
         voxCol[2] = 0.0f;
-        voxren_submit_vox(voxPos, voxSize, voxCol);
+        voxren_submit_vox(voxPos, voxSize, voxCol, &voxTex);
         voxren_render_batch();
 
         shader_use(lightShader);
-        voxren_submit_vox(lightPos, lightSize, lightCol);
+        voxren_submit_vox(lightPos, lightSize, lightCol, &voxTex);
         voxren_render_batch();
 
         glfwSwapBuffers(window);

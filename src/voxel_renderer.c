@@ -59,6 +59,15 @@ void voxren_init() {
             GL_FALSE,       // normalise.
             sizeof(Vertex), // stride.
             (void*) offsetof(Vertex, normal));
+    // Texture.
+    vao_vertex_attrib(
+            &s_rData.vao,
+            3,              // attrib no.
+            2,              // no of elements in attrib.
+            GL_FLOAT,       // type of the elements.
+            GL_FALSE,       // normalise.
+            sizeof(Vertex), // stride.
+            (void*) offsetof(Vertex, texture));
 
     // Generate indices buffer and send it to GPU.
     uint32_t indices[MAX_INDICES];
@@ -88,7 +97,8 @@ void voxren_init() {
 void voxren_submit_vox(
         clmVec3 position, 
         clmVec3 size,
-        clmVec4 colour) {
+        clmVec4 colour,
+        VoxelTex* tex) {
     // For a voxel, 24 vertices are used, 4 for each rectangular face.
     // They are added in anti-clockwise order, so bottom left/right then
     // top right/left.
@@ -112,6 +122,9 @@ void voxren_submit_vox(
     float b = colour[2];
     float a = colour[3];
 
+    float texW = tex->normSpriteDim[0];
+    float texH = tex->normSpriteDim[1];
+
     // Front face of voxel.
     // Bottom-left.
     s_rData.vBufferPtr->position[0] = -width  + x;
@@ -124,6 +137,8 @@ void voxren_submit_vox(
     s_rData.vBufferPtr->normal[0] = 0.0f;
     s_rData.vBufferPtr->normal[1] = 0.0f;
     s_rData.vBufferPtr->normal[2] = 1.0f;
+    s_rData.vBufferPtr->texture[0] = tex->side[0];
+    s_rData.vBufferPtr->texture[1] = tex->side[1];
     s_rData.vBufferPtr++;
     // Bottom-right.
     s_rData.vBufferPtr->position[0] =  width  + x;
@@ -136,6 +151,8 @@ void voxren_submit_vox(
     s_rData.vBufferPtr->normal[0] = 0.0f;
     s_rData.vBufferPtr->normal[1] = 0.0f;
     s_rData.vBufferPtr->normal[2] = 1.0f;
+    s_rData.vBufferPtr->texture[0] = tex->side[0] + texW;
+    s_rData.vBufferPtr->texture[1] = tex->side[1];
     s_rData.vBufferPtr++;
     // Top-right.
     s_rData.vBufferPtr->position[0] =  width  + x;
@@ -148,6 +165,8 @@ void voxren_submit_vox(
     s_rData.vBufferPtr->normal[0] = 0.0f;
     s_rData.vBufferPtr->normal[1] = 0.0f;
     s_rData.vBufferPtr->normal[2] = 1.0f;
+    s_rData.vBufferPtr->texture[0] = tex->side[0] + texW;
+    s_rData.vBufferPtr->texture[1] = tex->side[1] + texH;
     s_rData.vBufferPtr++;
     // Top-left.
     s_rData.vBufferPtr->position[0] = -width  + x;
@@ -160,6 +179,8 @@ void voxren_submit_vox(
     s_rData.vBufferPtr->normal[0] = 0.0f;
     s_rData.vBufferPtr->normal[1] = 0.0f;
     s_rData.vBufferPtr->normal[2] = 1.0f;
+    s_rData.vBufferPtr->texture[0] = tex->side[0];
+    s_rData.vBufferPtr->texture[1] = tex->side[1] + texH;
     s_rData.vBufferPtr++;
 
 
@@ -175,6 +196,8 @@ void voxren_submit_vox(
     s_rData.vBufferPtr->normal[0] = 1.0f;
     s_rData.vBufferPtr->normal[1] = 0.0f;
     s_rData.vBufferPtr->normal[2] = 0.0f;
+    s_rData.vBufferPtr->texture[0] = tex->side[0];
+    s_rData.vBufferPtr->texture[1] = tex->side[1];
     s_rData.vBufferPtr++;
     // Bottom-right.
     s_rData.vBufferPtr->position[0] =  width  + x;
@@ -187,6 +210,8 @@ void voxren_submit_vox(
     s_rData.vBufferPtr->normal[0] = 1.0f;
     s_rData.vBufferPtr->normal[1] = 0.0f;
     s_rData.vBufferPtr->normal[2] = 0.0f;
+    s_rData.vBufferPtr->texture[0] = tex->side[0] + texW;
+    s_rData.vBufferPtr->texture[1] = tex->side[1];
     s_rData.vBufferPtr++;
     // Top-right.
     s_rData.vBufferPtr->position[0] =  width  + x;
@@ -199,6 +224,8 @@ void voxren_submit_vox(
     s_rData.vBufferPtr->normal[0] = 1.0f;
     s_rData.vBufferPtr->normal[1] = 0.0f;
     s_rData.vBufferPtr->normal[2] = 0.0f;
+    s_rData.vBufferPtr->texture[0] = tex->side[0] + texW;
+    s_rData.vBufferPtr->texture[1] = tex->side[1] + texH;
     s_rData.vBufferPtr++;
     // Top-left.
     s_rData.vBufferPtr->position[0] = width  + x;
@@ -211,6 +238,8 @@ void voxren_submit_vox(
     s_rData.vBufferPtr->normal[0] = 1.0f;
     s_rData.vBufferPtr->normal[1] = 0.0f;
     s_rData.vBufferPtr->normal[2] = 0.0f;
+    s_rData.vBufferPtr->texture[0] = tex->side[0];
+    s_rData.vBufferPtr->texture[1] = tex->side[1] + texH;
     s_rData.vBufferPtr++;
 
 
@@ -226,6 +255,8 @@ void voxren_submit_vox(
     s_rData.vBufferPtr->normal[0] =  0.0f;
     s_rData.vBufferPtr->normal[1] =  0.0f;
     s_rData.vBufferPtr->normal[2] = -1.0f;
+    s_rData.vBufferPtr->texture[0] = tex->side[0];
+    s_rData.vBufferPtr->texture[1] = tex->side[1];
     s_rData.vBufferPtr++;
     // Bottom-right.
     s_rData.vBufferPtr->position[0] = -width  + x;
@@ -238,6 +269,8 @@ void voxren_submit_vox(
     s_rData.vBufferPtr->normal[0] =  0.0f;
     s_rData.vBufferPtr->normal[1] =  0.0f;
     s_rData.vBufferPtr->normal[2] = -1.0f;
+    s_rData.vBufferPtr->texture[0] = tex->side[0] + texW;
+    s_rData.vBufferPtr->texture[1] = tex->side[1];
     s_rData.vBufferPtr++;
     // Top-right.
     s_rData.vBufferPtr->position[0] = -width  + x;
@@ -250,6 +283,8 @@ void voxren_submit_vox(
     s_rData.vBufferPtr->normal[0] =  0.0f;
     s_rData.vBufferPtr->normal[1] =  0.0f;
     s_rData.vBufferPtr->normal[2] = -1.0f;
+    s_rData.vBufferPtr->texture[0] = tex->side[0] + texW;
+    s_rData.vBufferPtr->texture[1] = tex->side[1] + texH;
     s_rData.vBufferPtr++;
     // Top-left.
     s_rData.vBufferPtr->position[0] =  width  + x;
@@ -262,6 +297,8 @@ void voxren_submit_vox(
     s_rData.vBufferPtr->normal[0] =  0.0f;
     s_rData.vBufferPtr->normal[1] =  0.0f;
     s_rData.vBufferPtr->normal[2] = -1.0f;
+    s_rData.vBufferPtr->texture[0] = tex->side[0];
+    s_rData.vBufferPtr->texture[1] = tex->side[1] + texH;
     s_rData.vBufferPtr++;
 
 
@@ -277,6 +314,8 @@ void voxren_submit_vox(
     s_rData.vBufferPtr->normal[0] = -1.0f;
     s_rData.vBufferPtr->normal[1] =  0.0f;
     s_rData.vBufferPtr->normal[2] =  0.0f;
+    s_rData.vBufferPtr->texture[0] = tex->side[0];
+    s_rData.vBufferPtr->texture[1] = tex->side[1];
     s_rData.vBufferPtr++;
     // Bottom-right.
     s_rData.vBufferPtr->position[0] = -width  + x;
@@ -289,6 +328,8 @@ void voxren_submit_vox(
     s_rData.vBufferPtr->normal[0] = -1.0f;
     s_rData.vBufferPtr->normal[1] =  0.0f;
     s_rData.vBufferPtr->normal[2] =  0.0f;
+    s_rData.vBufferPtr->texture[0] = tex->side[0] + texW;
+    s_rData.vBufferPtr->texture[1] = tex->side[1];
     s_rData.vBufferPtr++;
     // Top-right.
     s_rData.vBufferPtr->position[0] = -width  + x;
@@ -301,6 +342,8 @@ void voxren_submit_vox(
     s_rData.vBufferPtr->normal[0] = -1.0f;
     s_rData.vBufferPtr->normal[1] =  0.0f;
     s_rData.vBufferPtr->normal[2] =  0.0f;
+    s_rData.vBufferPtr->texture[0] = tex->side[0] + texW;
+    s_rData.vBufferPtr->texture[1] = tex->side[1] + texH;
     s_rData.vBufferPtr++;
     // Top-left.
     s_rData.vBufferPtr->position[0] = -width  + x;
@@ -313,6 +356,8 @@ void voxren_submit_vox(
     s_rData.vBufferPtr->normal[0] = -1.0f;
     s_rData.vBufferPtr->normal[1] =  0.0f;
     s_rData.vBufferPtr->normal[2] =  0.0f;
+    s_rData.vBufferPtr->texture[0] = tex->side[0];
+    s_rData.vBufferPtr->texture[1] = tex->side[1] + texH;
     s_rData.vBufferPtr++;
 
 
@@ -328,6 +373,8 @@ void voxren_submit_vox(
     s_rData.vBufferPtr->normal[0] =  0.0f;
     s_rData.vBufferPtr->normal[1] = -1.0f;
     s_rData.vBufferPtr->normal[2] =  0.0f;
+    s_rData.vBufferPtr->texture[0] = tex->bottom[0];
+    s_rData.vBufferPtr->texture[1] = tex->bottom[1];
     s_rData.vBufferPtr++;
     // Bottom-right.
     s_rData.vBufferPtr->position[0] =  width  + x;
@@ -340,6 +387,8 @@ void voxren_submit_vox(
     s_rData.vBufferPtr->normal[0] =  0.0f;
     s_rData.vBufferPtr->normal[1] = -1.0f;
     s_rData.vBufferPtr->normal[2] =  0.0f;
+    s_rData.vBufferPtr->texture[0] = tex->bottom[0] + texW;
+    s_rData.vBufferPtr->texture[1] = tex->bottom[1];
     s_rData.vBufferPtr++;
     // Top-right.
     s_rData.vBufferPtr->position[0] =  width  + x;
@@ -352,6 +401,8 @@ void voxren_submit_vox(
     s_rData.vBufferPtr->normal[0] =  0.0f;
     s_rData.vBufferPtr->normal[1] = -1.0f;
     s_rData.vBufferPtr->normal[2] =  0.0f;
+    s_rData.vBufferPtr->texture[0] = tex->bottom[0] + texW;
+    s_rData.vBufferPtr->texture[1] = tex->bottom[1] + texH;
     s_rData.vBufferPtr++;
     // Top-left.
     s_rData.vBufferPtr->position[0] = -width  + x;
@@ -364,6 +415,8 @@ void voxren_submit_vox(
     s_rData.vBufferPtr->normal[0] =  0.0f;
     s_rData.vBufferPtr->normal[1] = -1.0f;
     s_rData.vBufferPtr->normal[2] =  0.0f;
+    s_rData.vBufferPtr->texture[0] = tex->bottom[0];
+    s_rData.vBufferPtr->texture[1] = tex->bottom[1] + texH;
     s_rData.vBufferPtr++;
 
 
@@ -379,6 +432,8 @@ void voxren_submit_vox(
     s_rData.vBufferPtr->normal[0] = 0.0f;
     s_rData.vBufferPtr->normal[1] = 1.0f;
     s_rData.vBufferPtr->normal[2] = 0.0f;
+    s_rData.vBufferPtr->texture[0] = tex->top[0];
+    s_rData.vBufferPtr->texture[1] = tex->top[1];
     s_rData.vBufferPtr++;
     // Bottom-right.
     s_rData.vBufferPtr->position[0] =  width  + x;
@@ -391,6 +446,8 @@ void voxren_submit_vox(
     s_rData.vBufferPtr->normal[0] = 0.0f;
     s_rData.vBufferPtr->normal[1] = 1.0f;
     s_rData.vBufferPtr->normal[2] = 0.0f;
+    s_rData.vBufferPtr->texture[0] = tex->top[0] + texW;
+    s_rData.vBufferPtr->texture[1] = tex->top[1];
     s_rData.vBufferPtr++;
     // Top-right.
     s_rData.vBufferPtr->position[0] =  width  + x;
@@ -403,6 +460,8 @@ void voxren_submit_vox(
     s_rData.vBufferPtr->normal[0] = 0.0f;
     s_rData.vBufferPtr->normal[1] = 1.0f;
     s_rData.vBufferPtr->normal[2] = 0.0f;
+    s_rData.vBufferPtr->texture[0] = tex->top[0] + texW;
+    s_rData.vBufferPtr->texture[1] = tex->top[1] + texH;
     s_rData.vBufferPtr++;
     // Top-left.
     s_rData.vBufferPtr->position[0] = -width  + x;
@@ -415,6 +474,8 @@ void voxren_submit_vox(
     s_rData.vBufferPtr->normal[0] = 0.0f;
     s_rData.vBufferPtr->normal[1] = 1.0f;
     s_rData.vBufferPtr->normal[2] = 0.0f;
+    s_rData.vBufferPtr->texture[0] = tex->top[0];
+    s_rData.vBufferPtr->texture[1] = tex->top[1] + texH;
     s_rData.vBufferPtr++;
 
     s_rData.indicesCount += INDICES_PER_VOXEL;
