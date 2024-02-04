@@ -38,11 +38,11 @@ void cam_init_camera(Camera* cam,
     cam->sense = sense;
 }
 
-void cam_move(Camera* cam, clmVec3 move) {
+void cam_move(Camera* cam, clmVec3 move, float deltaTime) {
     // Grammmm SHmitttt. 
     // TODO: This is done in clm_mat4_lookat should probs not
     //       duplicate this code kind of waste of time.
-
+    //
     clmVec3 front;
     clmVec3 side;
     clmVec3 up = { cam->up[0], cam->up[1], cam->up[2] };
@@ -56,23 +56,19 @@ void cam_move(Camera* cam, clmVec3 move) {
     clm_v3_normalize(side);
 
     // move will contain values 1/-1/0, so determines which direction.
-    float frontScalar = cam->speed * move[0];
-    float sideScalar = cam->speed * move[1];
-    float upScalar = cam->speed * move[2];
+    float frontScalar = cam->speed * deltaTime * move[0];
+    float sideScalar  = cam->speed * deltaTime * move[1];
+    float upScalar    = cam->speed * deltaTime * move[2];
 
     clm_v3_scalar_multiply(frontScalar, front);
     clm_v3_scalar_multiply(sideScalar, side);
     clm_v3_scalar_multiply(upScalar, up);
 
-    // Add our translations on each axis into one translation.
-    clmVec3 translate;
-    clm_v3_add(front, side, translate);
-    clm_v3_add(translate, up, translate);
-
-    // Now add it to our position.
-    clm_v3_add(cam->position, translate, cam->position);
-}
-
+    clm_v3_add(cam->position, front, cam->position); 
+    clm_v3_add(cam->position, side, cam->position); 
+    clm_v3_add(cam->position, up, cam->position); 
+}                                                    
+                                                     
 void cam_view_matrix(Camera* cam, clmMat4 view) {
     clmVec3 front;
     front_vector(cam, front);

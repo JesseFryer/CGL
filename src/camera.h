@@ -40,7 +40,7 @@ void cam_init_camera(Camera* cam,
  * Move the camera in the direction of move.
  * move is presumed to be a unit vector.
  */
-void cam_move(Camera* cam, clmVec3 move);
+void cam_move(Camera* cam, clmVec3 move, float deltaTime);
 
 /* cam_view_matrix
  * ---------------

@@ -108,7 +108,7 @@ int main() {
     glfwSetCursorPosCallback(window, 
             mouse_cursor_callback);
 
-    // Create shader.
+    // Create shaders.
     unsigned int shader = shader_create(
             "vshader.glsl",
             "fshader.glsl");
@@ -132,7 +132,7 @@ int main() {
             45.0f,  // fov
             0.1f,   // near
             500.0f, // far
-            0.005f,  // speed
+            20.0f,   // speed
             0.1f);  // sense
     
     // Directional light.
@@ -189,7 +189,7 @@ int main() {
         if (input_is_pressed(K_LSHIFT)) {
             camMove[2] -= 1.0f;
         } 
-        cam_move(&camera, camMove);
+        cam_move(&camera, camMove, deltaTime);
 
         // Update our view and projection transforms.
         cam_view_matrix(&camera, view);

@@ -1,1 +1,1 @@
-..\bin\LOPGL.exe
+..\bin\CGL.exe
