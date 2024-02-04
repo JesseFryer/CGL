@@ -13,9 +13,6 @@
 static int SCR_W = 1600;
 static int SCR_H = 900;
 
-static float CURS_LAST_X;
-static float CURS_LAST_Y;
-
 static Camera camera;
 
 void framebuffer_size_callback(
@@ -32,19 +29,23 @@ void mouse_cursor_callback(
         double xpos,
         double ypos) {
     static bool first = true;
+
+    float xPos = xpos;
+    float yPos = ypos;
+
     if (first) {
-        CURS_LAST_X = xpos;
-        CURS_LAST_Y = ypos;
+        input_set_cursor_x(xPos);
+        input_set_cursor_y(yPos);
         first = false;
     }
 
-    float yaw = xpos - CURS_LAST_X;
-    float pitch = CURS_LAST_Y - ypos;
+    float yaw = xPos - input_get_cursor_x();
+    float pitch = input_get_cursor_y() - yPos;
 
     cam_rotate_camera(&camera, yaw, pitch);
 
-    CURS_LAST_X = xpos;
-    CURS_LAST_Y = ypos;
+    input_set_cursor_x(xPos);
+    input_set_cursor_y(yPos);
 }
 
 GLFWwindow* init_window(
@@ -79,8 +80,6 @@ GLFWwindow* init_window(
     vidMode = *glfwGetVideoMode(glfwGetPrimaryMonitor());
     SCR_W = vidMode.width;
     SCR_H = vidMode.height;
-    CURS_LAST_X = SCR_W / 2;
-    CURS_LAST_Y = SCR_H / 2;
 
     return window;
 }
