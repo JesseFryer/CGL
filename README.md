@@ -14,4 +14,6 @@ You can also navigate to the bin directory after running build.bat to find CGL.e
 
 # Features
 PHONG Lighting
+
+
 ![](https://github.com/JesseFryer/CGL/blob/main/gifs/showcase1.gif)
