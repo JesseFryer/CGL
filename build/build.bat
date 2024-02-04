@@ -1,6 +1,6 @@
 @echo off
 
-set progName=LOPGL
+set progName=CGL
 set binDir=..\..\bin\
 set srcDir=..\..\src\
 set libDir=..\..\deps\lib\
