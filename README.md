@@ -9,8 +9,9 @@ or at https://github.com/JesseFryer/clm
 # Windows
 Open a developer command prompt for VS and navigate to the build directory.
 Execute the batch file build.bat
-You can use run.bat to run, or br.bat to build and run.
+Use run.bat to run, or br.bat to build and run.
 You can also navigate to the bin directory after running build.bat to find CGL.exe
 
-# PHONG Lighting
+# Features
+PHONG Lighting
 ![](https://github.com/JesseFryer/CGL/blob/main/gifs/showcase1.gif)
