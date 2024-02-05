@@ -6,11 +6,14 @@ in vec3 fCamPos;
 in vec3 fNormal;
 in vec3 fObjColour;
 in float fObjAlpha;
+in vec2 fTexCoord;
+
+uniform sampler2D uTexture;
 
 out vec4 fragColour;
 
 void main() {
-    vec3 lightColour = vec3(0.8, 1.0, 1.0);
+    vec3 lightColour = vec3(1.0, 1.0, 1.0);
 
     float ambientStr = 0.1;
     vec3 ambient = ambientStr * lightColour;
@@ -25,6 +28,6 @@ void main() {
     float specularStr = pow(max(dot(viewDir, reflectDir), 0.0), 128);
     vec3 specular = specScalar * specularStr * lightColour;
 
-    vec3 result = (ambient + diffuse + specular) * fObjColour;
-    fragColour = vec4(result, fObjAlpha);
+    vec4 colour = texture(uTexture, fTexCoord);
+    fragColour = vec4((ambient + diffuse + specular), 1.0f) * colour;
 }

@@ -86,13 +86,6 @@ GLFWwindow* init_window(
 }
 
 int main() {
-    // Testing out the sprite atlas thingy.
-    SpriteAtlas atlas;
-    VoxelTex voxTex;
-
-    tex_init_atlas(&atlas, 128, 128, 16, 16);
-    tex_create_voxel_tex(&voxTex, &atlas, 8, 1, 2);
-
     // Create the window.
     GLFWwindow* window = init_window(
             "Voxoff Engine", 
@@ -109,6 +102,8 @@ int main() {
 
     glViewport(0, 0, SCR_W, SCR_H);
     glEnable(GL_DEPTH_TEST);
+
+
 
     // Set callbacks.
     glfwSetFramebufferSizeCallback(window, 
@@ -152,6 +147,24 @@ int main() {
     bool running = true;
     double lastTime = glfwGetTime();
     float reportFrameTimer = 0.0f;
+
+    // Testing out the sprite atlas thingy.
+    SpriteAtlas atlas;
+    VoxelTex voxTex;
+    tex_init_atlas(&atlas, 1024, 1024, 16, 16);
+    tex_create_voxel_tex(&voxTex, &atlas, 0, 1, 2);
+    printf("top side bottom\n");
+    clm_v2_print(voxTex.top);
+    clm_v2_print(voxTex.side);
+    clm_v2_print(voxTex.bottom);
+    printf("\nnormlaized dimensions (x,y): (%.4f, %.4f)\n", 
+            voxTex.normSpriteDim[0],
+            voxTex.normSpriteDim[1]);
+
+    // Test texture loading.
+    unsigned int wallTex = tex_load_texture("wall.png");
+    unsigned int blockAtlas = tex_load_texture("block_tex_atlas.png");
+    glBindTexture(GL_TEXTURE_2D, blockAtlas);
 
     while(running) {
         // Delta time.
@@ -228,9 +241,9 @@ int main() {
         shader_use(shader);
         voxren_submit_vox(voxPos, voxSize, voxCol, &voxTex);
         voxPos[1] = 5.0f;
-        voxSize[0] = 5.0f;
-        voxSize[1] = 5.0f;
-        voxSize[2] = 5.0f;
+        voxSize[0] = 1.0f;
+        voxSize[1] = 1.0f;
+        voxSize[2] = 1.0f;
         voxCol[0] = 0.0f;
         voxCol[1] = 1.0f;
         voxCol[2] = 0.0f;

@@ -482,6 +482,16 @@ void voxren_submit_vox(
 }
 
 void voxren_render_batch() {
+    // Set up nearest for everything to retain blocky asthetic.
+    glTexParameteri(
+            GL_TEXTURE_2D, 
+            GL_TEXTURE_MIN_FILTER, 
+            GL_NEAREST_MIPMAP_NEAREST);
+    glTexParameteri(
+            GL_TEXTURE_2D, 
+            GL_TEXTURE_MAG_FILTER, 
+            GL_NEAREST_MIPMAP_NEAREST);
+
     // Bind vao and use shader.
     vao_bind(&s_rData.vao);
 

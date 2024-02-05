@@ -262,7 +262,7 @@ void clm_mat4_print(clmMat4 mat) {
 }
 
 void clm_v2_print(clmVec2 v) {
-    printf("(%.3f, %.3f)", v[0], v[1]);
+    printf("(%.6f, %.6f)", v[0], v[1]);
 }
 
 void clm_v3_print(clmVec3 v) {

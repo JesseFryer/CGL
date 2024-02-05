@@ -4,6 +4,8 @@
 #ifndef TEXTURE_H
 #define TEXTURE_H
 
+#define TEXTURE_FOLDER "../res/"
+
 typedef struct SpriteAtlas {
     // Total texture size in pixels.
     unsigned int atlasPixW;
@@ -52,10 +54,10 @@ void tex_create_voxel_tex(
         unsigned int bottomIndex,
         unsigned int sideIndex);
 
-
-
-
-
-
+/* tex_load_texture
+ * ----------------
+ * Load an OpenGL texture and receive its id handle. (png only atm)
+ */
+unsigned int tex_load_texture(const char* texPath);
 
 #endif
