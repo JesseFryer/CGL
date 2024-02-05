@@ -15,7 +15,7 @@ out vec4 fragColour;
 void main() {
     vec3 lightColour = vec3(1.0, 1.0, 1.0);
 
-    float ambientStr = 0.4;
+    float ambientStr = 0.1;
     vec3 ambient = ambientStr * lightColour;
 
     vec3 diffuseDir = normalize(fLightPos - fPos);

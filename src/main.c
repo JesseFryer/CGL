@@ -141,27 +141,16 @@ int main() {
             0.1f);  // sense
     
     // Directional light.
-    clmVec3 lightPos = { 0.0f, 8.0f, 0.0f };
-    float moveRadius = 8.0f;
+    clmVec3 lightPos = { 0.0f, 10.0f, 0.0f };
+    float moveRadius = 12.0f;
     float lightSpeed = 0.5f;
     float centre = 0.0f;
-    
-    bool running = true;
-    double lastTime = glfwGetTime();
-    float reportFrameTimer = 0.0f;
 
     // Testing out the sprite atlas thingy.
     SpriteAtlas atlas;
     VoxelTex voxTex;
     tex_init_atlas(&atlas, 256, 256, 16, 16);
-    tex_create_voxel_tex(&voxTex, &atlas, 229, 229, 228);
-    printf("top side bottom\n");
-    clm_v2_print(voxTex.top);
-    clm_v2_print(voxTex.side);
-    clm_v2_print(voxTex.bottom);
-    printf("\nnormlaized dimensions (x,y): (%.4f, %.4f)\n", 
-            voxTex.normSpriteDim[0],
-            voxTex.normSpriteDim[1]);
+    tex_create_voxel_tex(&voxTex, &atlas, 240, 242, 243);
 
     // Test texture loading.
     unsigned int wallTex = tex_load_texture("wall.png");
@@ -169,25 +158,22 @@ int main() {
     unsigned int mcAtlas = tex_load_texture("minecraft_atlas.png");
     glBindTexture(GL_TEXTURE_2D, mcAtlas);
 
-    int chunk[CHUNK_SIZE][CHUNK_SIZE][CHUNK_SIZE] = {0};
-    for (int x = 0; x < CHUNK_SIZE; x++) {
-        for (int y = 0; y < CHUNK_SIZE; y++) {
-            for (int z = 0; z < CHUNK_SIZE; z++) {
-                chunk[x][y][z] = 1;
-            }
-        }
-    }
-
+    bool running = true;
+    double lastTime = glfwGetTime();
+    float reportFrameTimer = 0.0f;
+    int frameCount = 0;
     while(running) {
         // Delta time.
         double currTime = glfwGetTime();
         float deltaTime = currTime - lastTime;
         lastTime = currTime;
         reportFrameTimer += deltaTime;
+        frameCount++;
 
         if (reportFrameTimer >= 1.0f) {
-            printf("frame time (ms): %.4f\n", deltaTime * 1000.0f);
+            printf("FPS: %d\n", frameCount);
             reportFrameTimer = 0.0f;
+            frameCount = 0;
         }
 
         // Events and program exit.
@@ -239,31 +225,19 @@ int main() {
         shader_set_uniform_mat4(lightShader, "proj", proj);
 
         // Render.
-        glClearColor(0.1f, 0.6f, 1.0f, 1.0f);
+        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         clmVec4 white  = { 1.0f, 1.0f, 1.0f, 1.0f };
-
-        clmVec3 voxSize = { 1.0f, 1.0f, 1.0f };
+        clmVec3 voxSize = { 5.0f, 5.0f, 5.0f };
         clmVec3 voxPos  = { 0.0f, 0.0f, 0.0f };
 
         shader_use(shader);
-        for (int x = 0; x < CHUNK_SIZE; x++) {
-            for (int y = 0; y < CHUNK_SIZE; y++) {
-                for (int z = 0; z < CHUNK_SIZE; z++) {
-                    if (chunk[x][y][z]) {
-                        voxPos[0] = x;
-                        voxPos[1] = y;
-                        voxPos[2] = z;
-                        voxren_submit_vox(
-                                voxPos, 
-                                voxSize, 
-                                white,
-                                &voxTex);
-                    }
-                }
-            }
-        }
+        voxren_submit_vox(
+                voxPos, 
+                voxSize, 
+                white,
+                &voxTex);
         voxren_render_batch();
 
         shader_use(lightShader);
