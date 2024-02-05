@@ -11,6 +11,8 @@
 #include "texture.h"
 #include <math.h>
 
+#define CHUNK_SIZE 8
+
 static int SCR_W = 1600;
 static int SCR_H = 900;
 
@@ -151,8 +153,8 @@ int main() {
     // Testing out the sprite atlas thingy.
     SpriteAtlas atlas;
     VoxelTex voxTex;
-    tex_init_atlas(&atlas, 1024, 1024, 16, 16);
-    tex_create_voxel_tex(&voxTex, &atlas, 0, 1, 2);
+    tex_init_atlas(&atlas, 256, 256, 16, 16);
+    tex_create_voxel_tex(&voxTex, &atlas, 229, 229, 228);
     printf("top side bottom\n");
     clm_v2_print(voxTex.top);
     clm_v2_print(voxTex.side);
@@ -164,7 +166,17 @@ int main() {
     // Test texture loading.
     unsigned int wallTex = tex_load_texture("wall.png");
     unsigned int blockAtlas = tex_load_texture("block_tex_atlas.png");
-    glBindTexture(GL_TEXTURE_2D, blockAtlas);
+    unsigned int mcAtlas = tex_load_texture("minecraft_atlas.png");
+    glBindTexture(GL_TEXTURE_2D, mcAtlas);
+
+    int chunk[CHUNK_SIZE][CHUNK_SIZE][CHUNK_SIZE] = {0};
+    for (int x = 0; x < CHUNK_SIZE; x++) {
+        for (int y = 0; y < CHUNK_SIZE; y++) {
+            for (int z = 0; z < CHUNK_SIZE; z++) {
+                chunk[x][y][z] = 1;
+            }
+        }
+    }
 
     while(running) {
         // Delta time.
@@ -227,31 +239,37 @@ int main() {
         shader_set_uniform_mat4(lightShader, "proj", proj);
 
         // Render.
-        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+        glClearColor(0.1f, 0.6f, 1.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        clmVec3 voxPos = { 0.0f, 0.0f, 0.0f };
+        clmVec4 white  = { 1.0f, 1.0f, 1.0f, 1.0f };
 
-        clmVec4 voxCol = { 0.2f, 0.3f, 1.0f, 1.0f };
-        clmVec4 lightCol = { 1.0f, 1.0f, 1.0f, 1.0f };
-
-        clmVec3 voxSize = { 50.0f, 0.5f, 50.0f };
-        clmVec3 lightSize = { 0.25f, 0.25f, 0.25f };
+        clmVec3 voxSize = { 1.0f, 1.0f, 1.0f };
+        clmVec3 voxPos  = { 0.0f, 0.0f, 0.0f };
 
         shader_use(shader);
-        voxren_submit_vox(voxPos, voxSize, voxCol, &voxTex);
-        voxPos[1] = 5.0f;
-        voxSize[0] = 1.0f;
-        voxSize[1] = 1.0f;
-        voxSize[2] = 1.0f;
-        voxCol[0] = 0.0f;
-        voxCol[1] = 1.0f;
-        voxCol[2] = 0.0f;
-        voxren_submit_vox(voxPos, voxSize, voxCol, &voxTex);
+        for (int x = 0; x < CHUNK_SIZE; x++) {
+            for (int y = 0; y < CHUNK_SIZE; y++) {
+                for (int z = 0; z < CHUNK_SIZE; z++) {
+                    if (chunk[x][y][z]) {
+                        voxPos[0] = x;
+                        voxPos[1] = y;
+                        voxPos[2] = z;
+                        voxren_submit_vox(
+                                voxPos, 
+                                voxSize, 
+                                white,
+                                &voxTex);
+                    }
+                }
+            }
+        }
         voxren_render_batch();
 
         shader_use(lightShader);
-        voxren_submit_vox(lightPos, lightSize, lightCol, &voxTex);
+        clmVec3 lightSize = { 2.0f, 2.0f, 2.0f };
+        clmVec3 lightCol = { 1.0f, 1.0f, 1.0f };
+        voxren_submit_vox(lightPos, lightSize, white, &voxTex);
         voxren_render_batch();
 
         glfwSwapBuffers(window);
