@@ -16,7 +16,8 @@ set src=%srcDir%main.c^
  %srcDir%clm.c^
  %srcDir%camera.c^
  %srcDir%voxel_renderer.c^
- %srcDir%texture.c
+ %srcDir%texture.c^
+ %srcDir%cgl.c
 
 set libs=glfw3.lib opengl32.lib user32.lib gdi32.lib shell32.lib ws2_32.lib
 

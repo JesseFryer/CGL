@@ -24,8 +24,9 @@ typedef struct Camera {
 
 /* cam_init_camera
  * ---------------
- * Initialize a perspective camera. Is useful for producing
- * both the projection and view transforms.
+ * Initialise a perspective camera. 
+ * Is useful for producing both the projection and 
+ * view transforms.
  */
 void cam_init_camera(Camera* cam,
         clmVec3 position,
@@ -38,32 +39,43 @@ void cam_init_camera(Camera* cam,
 /* cam_move
  * --------
  * Move the camera in the direction of move.
- * move is presumed to be a unit vector.
+ * clmVec3 move represents:
+ *    { forward/back, up/down, right/left }
+ * and can take on the values:
+ *    { 1/0/-1, 1/0/-1, 1/0/-1 }
+ * 
+ * setting move[0] = 1 for example will move the camera
+ * forward according to its direction and speed.
  */
 void cam_move(Camera* cam, clmVec3 move, float deltaTime);
 
 /* cam_view_matrix
  * ---------------
- * Store the camera view matrix in view.
+ * Calculate and store the camera view matrix in view.
  * The view matrix is a lookat matrix.
  */
 void cam_view_matrix(Camera* cam, clmMat4 view);
 
 /* cam_proj_matrix
  * ---------------
- * Store the camera projection matrix in proj. 
- * Recalculate this with the new aspect ratio
- * whenever the window is resized.
- * The projection matrix is a perspective projection matrix.
+ * Calculate and store the camera projection matrix in 
+ * proj. 
+ *
+ * This will need to be recalculated with the new aspect 
+ * ratio if the window is resized.
  */
-void cam_proj_matrix(Camera* cam, 
+void cam_proj_matrix(
+        Camera* cam, 
         float aspectRatio,
         clmMat4 proj);
 
 /* cam_rotate_camera
  * -----------------
- * Rotate the camera by an offset.
+ * Rotate the camera by yaw and pitch.
  */
-void cam_rotate_camera(Camera* cam, float yaw, float pitch);
+void cam_rotate_camera(
+        Camera* cam, 
+        float yaw, 
+        float pitch);
 
 #endif

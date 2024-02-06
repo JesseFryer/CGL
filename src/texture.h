@@ -1,8 +1,10 @@
-/* texture.h
- */
-
 #ifndef TEXTURE_H
 #define TEXTURE_H
+
+/*
+ * texture.h
+ *
+ */
 
 #define TEXTURE_FOLDER "../res/"
 
