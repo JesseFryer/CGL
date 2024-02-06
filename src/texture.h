@@ -2,7 +2,10 @@
 #define TEXTURE_H
 
 /*
+ *
  * texture.h
+ *
+ * Author: Jesse Fryer
  *
  */
 

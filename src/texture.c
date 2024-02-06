@@ -61,10 +61,19 @@ unsigned int tex_load_texture(const char* texPath) {
     free(path);
 
     // Create OpenGL texture.
+    static unsigned int slot = 0;
     unsigned int tex = 0;
     if (data) {
         glGenTextures(1, &tex);  
+        glActiveTexture(GL_TEXTURE0 + slot++);
         glBindTexture(GL_TEXTURE_2D, tex);
+
+        // Parameters.
+        glTexParameteri(GL_TEXTURE_2D,
+                GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D,
+                GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
         glTexImage2D(
                 GL_TEXTURE_2D, 
                 0, 
@@ -77,7 +86,8 @@ unsigned int tex_load_texture(const char* texPath) {
         glGenerateMipmap(GL_TEXTURE_2D);
         stbi_image_free(data);
     } else {
-        fprintf(stderr, "Failed to load image with stbi_image\n");
+        fprintf(stderr, 
+                "Failed to load image with stbi_image\n");
     }
 
     return tex;

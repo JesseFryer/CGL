@@ -8,7 +8,8 @@ in vec3 fObjColour;
 in float fObjAlpha;
 in vec2 fTexCoord;
 
-uniform sampler2D uTexture;
+uniform sampler2D uTextureAtlas;
+uniform sampler2D uDiffuseAtlas;
 
 out vec4 fragColour;
 
@@ -28,7 +29,7 @@ void main() {
     float specularStr = pow(max(dot(viewDir, reflectDir), 0.0), 128);
     vec3 specular = specScalar * specularStr * lightColour;
 
-    vec4 colour = texture(uTexture, fTexCoord);
+    vec4 colour = texture(uTextureAtlas, fTexCoord);
     fragColour = vec4((ambient + diffuse + specular), 1.0f) * colour;
 
     if (fragColour.a < 0.2) {

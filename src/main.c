@@ -8,7 +8,6 @@ int main() {
 
     GLFWwindow* window = cgl_window();
 
-    // Create shaders.
     unsigned int shader = shader_create(
             "vshader.glsl",
             "fshader.glsl");
@@ -35,25 +34,18 @@ int main() {
     VoxelTex voxTex;
     tex_init_atlas(&atlas, 256, 256, 16, 16);
     tex_create_voxel_tex(&voxTex, &atlas, 96, 96, 96);
-
-    // Test texture loading.
-    unsigned int mcAtlas = 
-        tex_load_texture("minecraft_atlas.png");
-    unsigned int fontAtlas = 
-        tex_load_texture("font.png");
     
-    glBindTexture(GL_TEXTURE_2D, mcAtlas);
-
-    double lastTime = glfwGetTime();
+    double lastTime = glfwGetTime() - FRAME_TIME;
     float reportFrameTimer = 0.0f;
     int frameCount = 0;
     bool running = true;
     while(running) {
         // Delta time.
         double currTime = glfwGetTime();
-        float deltaTime = currTime - lastTime;
+        double deltaTime = currTime - lastTime;
+        float timeStep = deltaTime;
         lastTime = currTime;
-        reportFrameTimer += deltaTime;
+        reportFrameTimer += timeStep;
         frameCount++;
 
         // Report fps.
@@ -97,7 +89,7 @@ int main() {
             camMove[2] -= 1.0f;
         } 
 
-        cam_move(cgl_camera(), camMove, deltaTime);
+        cam_move(cgl_camera(), camMove, timeStep);
 
         // Update our view and projection transforms.
         cam_view_matrix(

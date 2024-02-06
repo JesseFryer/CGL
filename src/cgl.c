@@ -98,7 +98,16 @@ GLFWwindow* init_window() {
 
     glfwMakeContextCurrent(window);
 
+    glfwSwapInterval(1);
+
     return window;
+}
+
+void load_textures() {
+    // The order in which textures are loaded determines
+    // their corresponding texture slot.
+    tex_load_texture("minecraft_atlas.png");
+    tex_load_texture("font.png");
 }
 
 bool cgl_init() {
@@ -118,6 +127,8 @@ bool cgl_init() {
     glViewport(0, 0, cgl_win_w(), cgl_win_h());
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
+
+    load_textures();
 
     // Set the window input is taken from.
     input_set_window(s_aData.window);
@@ -154,3 +165,4 @@ Camera* cgl_camera() {
 GLFWwindow* cgl_window() {
     return s_aData.window;
 }
+
