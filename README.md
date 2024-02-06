@@ -15,6 +15,7 @@ access to the cl compiler and check it's the x64 version.
 
 ```
 > git clone https://github.com/JesseFryer/CGL.git
+> cd CGL
 > mkdir bin
 > cd build
 > build.bat
