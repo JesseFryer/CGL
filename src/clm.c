@@ -208,6 +208,23 @@ void clm_mat4_perspective(clmMat4 proj,
     proj[14] = (2.0f * far * near) / (near - far);
 }
 
+void clm_mat4_ortho(
+        clmMat4 proj,
+        float left,
+        float right,
+        float bottom,
+        float top,
+        float near,
+        float far) {
+    clm_mat4_identity(proj);
+    proj[0] = 2.0f / (right - left);
+    proj[5] = 2.0f / (top - bottom);
+    proj[10] = -2.0f / (far - near);
+    proj[12] = -1 * (right + left) / (right - left);
+    proj[13] = -1 * (top + bottom) / (top - bottom);
+    proj[14] = -1 * (far + near) / (far - near);
+}
+
 void clm_mat4_lookat(clmMat4 lookat,
         clmVec3 position,
         clmVec3 target,

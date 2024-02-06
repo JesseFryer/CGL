@@ -68,6 +68,15 @@ void cam_move(Camera* cam, clmVec3 move, float deltaTime) {
     clm_v3_add(cam->position, side, cam->position); 
     clm_v3_add(cam->position, up, cam->position); 
 }                                                    
+
+void cam_move_simple(
+        Camera* cam, 
+        clmVec3 move, 
+        float deltaTime) {
+    clm_v3_scalar_multiply(deltaTime, move);
+    clm_v3_scalar_multiply(cam->speed, move);
+    clm_v3_add(cam->position, move, cam->position);
+}
                                                      
 void cam_view_matrix(Camera* cam, clmMat4 view) {
     clmVec3 front;

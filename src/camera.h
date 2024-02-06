@@ -47,7 +47,20 @@ void cam_init_camera(Camera* cam,
  * setting move[0] = 1 for example will move the camera
  * forward according to its direction and speed.
  */
-void cam_move(Camera* cam, clmVec3 move, float deltaTime);
+void cam_move(
+        Camera* cam, 
+        clmVec3 move, 
+        float deltaTime);
+
+/* cam_move_by_value
+ * -----------------
+ * Same as cam_move but direction is fixed to x y z.
+ * Better for orthographic camera.
+ */
+void cam_move_simple(
+        Camera* cam, 
+        clmVec3 move, 
+        float deltaTime);
 
 /* cam_view_matrix
  * ---------------

@@ -117,19 +117,20 @@ bool cgl_init() {
 
     glViewport(0, 0, cgl_win_w(), cgl_win_h());
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_BLEND);
 
     // Set the window input is taken from.
     input_set_window(s_aData.window);
 
     // Initialise the camera.
-    clmVec3 initCamPos = { 0.0f, 5.0f, 10.0f };
+    clmVec3 initCamPos = { 0.0f, 3.0f, 10.0f };
     cam_init_camera(
             &s_aData.camera,
             initCamPos,
             45.0f,  // fov
             0.1f,   // near
             200.0f, // far
-            20.0f,   // speed
+            10.0f,   // speed
             0.1f);  // sense
 
     // Initialise the voxel renderer.

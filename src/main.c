@@ -25,8 +25,8 @@ int main() {
     clmVec3 camMove = { 0.0f, 0.0f, 0.0f };
     
     // Directional light.
-    clmVec3 lightPos = { 0.0f, 10.0f, 0.0f };
-    float moveRadius = 12.0f;
+    clmVec3 lightPos = { 0.0f, 0.0f, 0.0f };
+    float moveRadius = 2.0f;
     float lightSpeed = 0.5f;
     float centre = 0.0f;
 
@@ -34,17 +34,13 @@ int main() {
     SpriteAtlas atlas;
     VoxelTex voxTex;
     tex_init_atlas(&atlas, 256, 256, 16, 16);
-    tex_create_voxel_tex(&voxTex, &atlas, 240, 242, 243);
+    tex_create_voxel_tex(&voxTex, &atlas, 96, 96, 96);
 
     // Test texture loading.
-    unsigned int wallTex = 
-        tex_load_texture("wall.png");
-
-    unsigned int blockAtlas = 
-        tex_load_texture("block_tex_atlas.png");
-
     unsigned int mcAtlas = 
         tex_load_texture("minecraft_atlas.png");
+    unsigned int fontAtlas = 
+        tex_load_texture("font.png");
     
     glBindTexture(GL_TEXTURE_2D, mcAtlas);
 
@@ -100,6 +96,7 @@ int main() {
         if (input_is_pressed(K_LSHIFT)) {
             camMove[2] -= 1.0f;
         } 
+
         cam_move(cgl_camera(), camMove, deltaTime);
 
         // Update our view and projection transforms.
@@ -109,7 +106,8 @@ int main() {
 
         cam_proj_matrix(
                 cgl_camera(),
-                (float) cgl_win_w() / (float) cgl_win_h(),
+                (float) cgl_win_w() /
+                (float) cgl_win_h(),
                 proj);
 
         // Set uniforms.
@@ -149,7 +147,7 @@ int main() {
                 GL_DEPTH_BUFFER_BIT);
 
         clmVec4 white  = { 1.0f, 1.0f, 1.0f, 1.0f };
-        clmVec3 voxSize = { 5.0f, 5.0f, 5.0f };
+        clmVec3 voxSize = { 1.0f, 1.0f, 1.0f };
         clmVec3 voxPos  = { 0.0f, 0.0f, 0.0f };
 
         // Grass block.
@@ -163,7 +161,7 @@ int main() {
 
         // Rotating light.
         shader_use(lightShader);
-        clmVec3 lightSize = { 2.0f, 2.0f, 2.0f };
+        clmVec3 lightSize = { 0.2f, 0.2f, 0.2f };
         clmVec3 lightCol = { 1.0f, 1.0f, 1.0f };
         voxren_submit_vox(
                 lightPos, 

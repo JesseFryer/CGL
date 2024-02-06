@@ -133,6 +133,19 @@ void clm_mat4_perspective(clmMat4 proj,
         float near, 
         float far);
 
+/* clm_mat4_ortho
+ * --------------
+ * Store the orthographic projection matrix in proj.
+ */
+void clm_mat4_ortho(
+        clmMat4 proj,
+        float left,
+        float right,
+        float bottom,
+        float top,
+        float near,
+        float far);
+
 /* clm_mat4_lookat
  * ---------------
  * Store the lookat view matrix in lookat.
