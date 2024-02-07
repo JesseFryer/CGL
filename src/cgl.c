@@ -5,22 +5,33 @@
 #define OPENGL_VERSION_MAJOR 3
 #define OPENGL_VERSION_MINOR 3
 
-typedef struct {
-    GLFWwindow* window;
-    int winW;
-    int winH;
-    Camera camera;
-} AppData;
-
 static AppData s_aData;
 
 void framebuffer_size_callback(
         GLFWwindow* window, 
         int width, 
         int height) {
-    glViewport(0, 0, width, height);
+    // Update viewport.
     s_aData.winW = width;
     s_aData.winH = height;
+    glViewport(0, 0, width, height);
+
+    // Recalculate projection matrix.
+    cam_proj_matrix(
+            &s_aData.camera,
+            (float) width /
+            (float) height,
+            s_aData.proj);
+
+    // Update projection uniforms.
+    shader_set_uniform_mat4(
+            s_aData.voxelShader, 
+            "proj", 
+            s_aData.proj);
+    shader_set_uniform_mat4(
+            s_aData.lightShader, 
+            "proj", 
+            s_aData.proj);
 } 
 
 void mouse_cursor_callback(
@@ -41,7 +52,7 @@ void mouse_cursor_callback(
 
     float yaw = xPos - input_get_cursor_x();
     float pitch = input_get_cursor_y() - yPos;
-    cam_rotate_camera(cgl_camera(), yaw, pitch);
+    cam_rotate_camera(&s_aData.camera, yaw, pitch);
 
     input_set_cursor_x(xPos);
     input_set_cursor_y(yPos);
@@ -77,6 +88,7 @@ GLFWwindow* init_window() {
         return NULL;
     }
 
+    // Disable cursor.
     glfwSetInputMode(
             window, 
             GLFW_CURSOR, 
@@ -96,8 +108,10 @@ GLFWwindow* init_window() {
     glfwSetCursorPosCallback(window, 
             mouse_cursor_callback);
 
+    // Context.
     glfwMakeContextCurrent(window);
 
+    // Vsync.
     glfwSwapInterval(1);
 
     return window;
@@ -106,28 +120,28 @@ GLFWwindow* init_window() {
 void load_textures() {
     // The order in which textures are loaded determines
     // their corresponding texture slot.
-    tex_load_texture("minecraft_atlas.png");
-    tex_load_texture("font.png");
+    tex_load_texture("minecraft_atlas.png"); // slot 0
+    tex_load_texture("font.png");            // slot 1
 }
 
-bool cgl_init() {
+AppData* cgl_init() {
     s_aData.window = init_window();
 
     if (!s_aData.window) {
-        return false;
+        return NULL;
     }
 
     // Load glad.
     if (!gladLoadGLLoader(
                 (GLADloadproc)glfwGetProcAddress)) {
         fprintf(stderr, "[ERROR] Failed to load glad\n");
-        return false;
+        return NULL;
     }
 
-    glViewport(0, 0, cgl_win_w(), cgl_win_h());
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
 
+    // Textures.
     load_textures();
 
     // Set the window input is taken from.
@@ -138,31 +152,78 @@ bool cgl_init() {
     cam_init_camera(
             &s_aData.camera,
             initCamPos,
-            45.0f,  // fov
-            0.1f,   // near
+            45.0f,   // fov
+            0.1f,    // near
             1000.0f, // far
             10.0f,   // speed
-            0.1f);  // sense
-
+            0.1f);   // sense
+  
     // Initialise the voxel renderer.
     voxren_init();
 
-    return true;
+    // Create shaders.
+    s_aData.voxelShader = shader_create(
+            "vshader.glsl",
+            "fshader.glsl");
+
+    s_aData.lightShader = shader_create(
+            "vlightshader.glsl",
+            "flightshader.glsl");
+
+    // Set viewport, initialise projection matrix
+    // and set the projection uniforms in shader.
+    framebuffer_size_callback(
+            s_aData.window, 
+            s_aData.winW, 
+            s_aData.winH);
+
+    return &s_aData;
 }
 
-int cgl_win_w() {
-    return s_aData.winW;
+void cgl_update_view() {
+    // Recalculate view matrix.
+    cam_view_matrix(
+            &s_aData.camera, 
+            s_aData.view);
+
+    // Update uniforms.
+    shader_set_uniform_mat4(
+            s_aData.voxelShader, 
+            "view", 
+            s_aData.view);
+
+    shader_set_uniform_mat4(
+            s_aData.lightShader,
+            "view", 
+            s_aData.view);
+
+    shader_set_uniform_vec3(
+            s_aData.voxelShader, 
+            "vCamPos", 
+            s_aData.camera.position);
+
 }
 
-int cgl_win_h() {
-    return s_aData.winH;
+void cgl_move_camera(float timeStep) {
+    // Move the camera about.
+    clmVec3 camMove = { 0.0f };
+    if (input_is_pressed(K_W)) {
+        camMove[0] += 1.0f;
+    } 
+    if (input_is_pressed(K_S)) {
+        camMove[0] -= 1.0f;
+    } 
+    if (input_is_pressed(K_D)) {
+        camMove[1] += 1.0f;
+    } 
+    if (input_is_pressed(K_A)) {
+        camMove[1] -= 1.0f;
+    } 
+    if (input_is_pressed(K_SPACE)) {
+        camMove[2] += 1.0f;
+    } 
+    if (input_is_pressed(K_LSHIFT)) {
+        camMove[2] -= 1.0f;
+    } 
+    cam_move(&s_aData.camera, camMove, timeStep);
 }
-
-Camera* cgl_camera() {
-    return &s_aData.camera;
-}
-
-GLFWwindow* cgl_window() {
-    return s_aData.window;
-}
-

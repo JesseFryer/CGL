@@ -15,36 +15,32 @@
 #include "vao.h"
 #include "texture.h"
 #include "voxel_renderer.h"
+#include "types.h"
+
+typedef struct {
+    GLFWwindow* window;
+    Camera camera;
+    clmMat4 proj;
+    clmMat4 view;
+    u32 voxelShader;
+    u32 lightShader;
+    int winW;
+    int winH;
+} AppData;
 
 /* cgl_init
  * --------
  * Initialise the cgl engine.
  */
-bool cgl_init();
+AppData* cgl_init();
 
-/* cgl_win_w
- * ---------
- * Returns the current window width.
+/* cgl_update_view
+ * ---------------
+ * Recalculate the camera's view matrix and
+ * update the corresponding uniforms in shaders.
  */
-int cgl_win_w();
+void cgl_update_view();
 
-/* cgl_win_h
- * ---------
- * Returns the current window height.
- */
-int cgl_win_h();
-
-/* cgl_camera
- * ----------
- * Returns a pointer to the camera. See camera.h on how
- * to use it.
- */
-Camera* cgl_camera();
-
-/* cgl_window
- * ----------
- * Returns the window handle.
- */
-GLFWwindow* cgl_window();
+void cgl_move_camera(float timeStep);
 
 #endif
