@@ -1,7 +1,12 @@
 #include "cgl.h"
+#include "perlin.h"
 #include <stdio.h>
 #include <stdbool.h>
 #include <math.h>
+#include <windows.h>
+
+#define FRAME_CAP  144.0
+#define FRAME_TIME (1.0 / FRAME_CAP)
 
 int main() {
     cgl_init();
@@ -24,16 +29,13 @@ int main() {
     clmVec3 camMove = { 0.0f, 0.0f, 0.0f };
     
     // Directional light.
-    clmVec3 lightPos = { 0.0f, 0.0f, 0.0f };
-    float moveRadius = 2.0f;
-    float lightSpeed = 0.5f;
-    float centre = 0.0f;
+    clmVec3 lightPos = { 250.0f, 200.0f, 250.0f };
 
     // Testing out the sprite atlas thingy.
     SpriteAtlas atlas;
     VoxelTex voxTex;
     tex_init_atlas(&atlas, 256, 256, 16, 16);
-    tex_create_voxel_tex(&voxTex, &atlas, 96, 96, 96);
+    tex_create_voxel_tex(&voxTex, &atlas, 240, 242, 243);
     
     double lastTime = glfwGetTime() - FRAME_TIME;
     float reportFrameTimer = 0.0f;
@@ -48,6 +50,12 @@ int main() {
         reportFrameTimer += timeStep;
         frameCount++;
 
+        // Cap fps.
+        if (deltaTime < FRAME_TIME) {
+            unsigned int dur = 1000.0 * (FRAME_TIME - deltaTime);
+            Sleep(dur);
+        }
+
         // Report fps.
         if (reportFrameTimer >= 1.0f) {
             printf("FPS: %d\n", frameCount);
@@ -61,10 +69,6 @@ int main() {
                 input_is_pressed(K_ESC)) {
             running = false;
         }
-
-        // Move the light about
-        lightPos[0] = centre + moveRadius * cos(currTime);
-        lightPos[2] = centre + moveRadius * sin(currTime);
 
         // Move the camera about.
         camMove[0] = 0.0f; // forward/back 1/-1
@@ -134,7 +138,7 @@ int main() {
                 proj);
 
         // Render.
-        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+        glClearColor(0.1f, 0.3f, 0.7f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT |
                 GL_DEPTH_BUFFER_BIT);
 
@@ -142,18 +146,27 @@ int main() {
         clmVec3 voxSize = { 1.0f, 1.0f, 1.0f };
         clmVec3 voxPos  = { 0.0f, 0.0f, 0.0f };
 
-        // Grass block.
+        // Render a bunch using noise
+        float chunkW = 100.0f;
         shader_use(shader);
-        voxren_submit_vox(
-                voxPos, 
-                voxSize, 
-                white,
-                &voxTex);
+        for (float x = 0.0f; x < chunkW; x++) {
+            for (float z = 0.0f; z < chunkW; z++) {
+                float y = floorf(5.0f * perlin2d(x, z, 0.1, 4));
+                voxPos[0] = x;
+                voxPos[1] = y;
+                voxPos[2] = z;
+                voxren_submit_vox(
+                        voxPos, 
+                        voxSize, 
+                        white,
+                        &voxTex);
+            }
+        }
         voxren_render_batch();
 
         // Rotating light.
         shader_use(lightShader);
-        clmVec3 lightSize = { 0.2f, 0.2f, 0.2f };
+        clmVec3 lightSize = { 20.0f, 20.0f, 20.0f };
         clmVec3 lightCol = { 1.0f, 1.0f, 1.0f };
         voxren_submit_vox(
                 lightPos, 

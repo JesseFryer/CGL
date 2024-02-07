@@ -140,7 +140,7 @@ bool cgl_init() {
             initCamPos,
             45.0f,  // fov
             0.1f,   // near
-            200.0f, // far
+            1000.0f, // far
             10.0f,   // speed
             0.1f);  // sense
 

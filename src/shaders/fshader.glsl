@@ -14,7 +14,7 @@ uniform sampler2D uDiffuseAtlas;
 out vec4 fragColour;
 
 void main() {
-    vec3 lightColour = vec3(0.0, 1.0, 0.0);
+    vec3 lightColour = vec3(1.0, 1.0, 1.0);
 
     float ambientStr = 0.2;
     vec3 ambient = ambientStr * fObjColour;
