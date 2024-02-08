@@ -229,6 +229,33 @@ void cgl_move_camera(float timeStep) {
     cam_move(&s_aData.camera, camMove, timeStep);
 }
 
+void generate_chunks() {
+    const int numChunks = 8;
+    const static float terrainHeight = 0.0f;
+    for (int x = 0; x < numChunks; x++) {
+        for (int y = 0; y < numChunks; y++) {
+            for (int z = 0; z < numChunks; z++) {
+                Chunk* chunk = &s_aData.chunks[x][y][z];
+                chunk->x = (float) x;
+                chunk->y = (float) y;
+                chunk->z = (float) z;
+                for (size_t i = 0; i < BLOCKS_PER_CHUNK; i++) {
+                    float x = (chunk->x * CHUNK_W) + chunk_idx_to_x(i);
+                    float y = (chunk->y * CHUNK_H) + chunk_idx_to_y(i);
+                    float z = (chunk->z * CHUNK_D) + chunk_idx_to_z(i);
+                    float surfaceY = terrainHeight +
+                        (18.0f * perlin2d(x, z, 0.08f, 1));
+                    if (y < surfaceY) {
+                        chunk->blocks[i].type = 1;
+                    } else {
+                        chunk->blocks[i].type = 0;
+                    }
+                }
+            }
+        }
+    }
+}
+
 void cgl_run() {
     // Directional light.
     clmVec3 lightPos = { 250.0f, 200.0f, 250.0f };
@@ -238,7 +265,9 @@ void cgl_run() {
     VoxelTex voxTex;
     tex_init_atlas(&atlas, 256, 256, 16, 16);
     tex_create_voxel_tex(&voxTex, &atlas, 240, 242, 243);
-    
+
+    generate_chunks();
+
     double lastTime = glfwGetTime();
     float reportFrameTimer = 0.0f;
     bool running = true;
@@ -282,23 +311,14 @@ void cgl_run() {
         clmVec3 voxSize = { 1.0f, 1.0f, 1.0f };
         clmVec3 voxPos  = { 0.0f, 0.0f, 0.0f };
 
-        // Render a bunch using noise
-        float chunkW = 100.0f;
         shader_use(s_aData.voxelShader);
-        for (float x = 0.0f; x < chunkW; x++) {
-            for (float z = 0.0f; z < chunkW; z++) {
-                float y = floorf(5.0f * perlin2d(x, z, 0.1, 4));
-                voxPos[0] = x;
-                voxPos[1] = y;
-                voxPos[2] = z;
-                voxren_submit_vox(
-                        voxPos, 
-                        voxSize, 
-                        white,
-                        &voxTex);
+        for (int x = 0; x < 8; x++) {
+            for (int y = 0; y < 8; y++) {
+                for (int z = 0; z < 8; z++) {
+                    chunk_render(&s_aData.chunks[x][y][z]);
+                }
             }
         }
-        voxren_render_batch();
 
         // Rotating light.
         shader_use(s_aData.lightShader);

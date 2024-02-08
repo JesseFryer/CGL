@@ -17,6 +17,7 @@
 #include "voxel_renderer.h"
 #include "types.h"
 #include "perlin.h"
+#include "chunk.h"
 
 typedef struct {
     GLFWwindow* window;
@@ -25,6 +26,7 @@ typedef struct {
     clmMat4 view;
     u32 voxelShader;
     u32 lightShader;
+    Chunk chunks[8][8][8];
     int winW;
     int winH;
 } AppData;
