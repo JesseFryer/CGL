@@ -16,6 +16,7 @@
 #include "texture.h"
 #include "voxel_renderer.h"
 #include "types.h"
+#include "perlin.h"
 
 typedef struct {
     GLFWwindow* window;
@@ -34,6 +35,18 @@ typedef struct {
  */
 AppData* cgl_init();
 
+/* cgl_run
+ * -------
+ * Main loop.
+ */
+void cgl_run();
+
+/* cgl_cleanup
+ * -----------
+ * Cleanup resources.
+ */
+void cgl_cleanup();
+
 /* cgl_update_view
  * ---------------
  * Recalculate the camera's view matrix and
@@ -41,6 +54,10 @@ AppData* cgl_init();
  */
 void cgl_update_view();
 
+/* cgl_move_camera
+ * --------------
+ * Update the camera's position.
+ */
 void cgl_move_camera(float timeStep);
 
 #endif
