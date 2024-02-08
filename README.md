@@ -1,16 +1,18 @@
 # CGL
-CGL is a 3D rendering engine using OpenGL that is written entirely in C with 
-as few dependencies as possible (within reason). The only dependencies are GLFW
-and glad. 
+CGL is a 3D voxel engine using OpenGL written in C with as few dependencies as possible (within reason). 
 
-Vector and matrix math is handwritten and can be found either in this project
-or at https://github.com/JesseFryer/clm
+Dependencies:
+  - glfw3
+  - glad
+  - stbi_image
 
+The vector and matrix math library used is handmade and can be found either in this project or at https://github.com/JesseFryer/clm
+    
 # Build
 
 Windows
 
-Make sure you are in a Developer Command Prompt for Visual Studio so you have 
+To compile, make sure you are in a Developer Command Prompt for Visual Studio so you have 
 access to the cl compiler and check it's the x64 version.
 
 ```
