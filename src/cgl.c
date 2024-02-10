@@ -149,14 +149,14 @@ AppData* cgl_init() {
     input_set_window(s_aData.window);
 
     // Initialise the camera.
-    clmVec3 initCamPos = { 0.0f, 3.0f, 10.0f };
+    clmVec3 initCamPos = { 0.0f, 132.0f, 0.0f };
     cam_init_camera(
             &s_aData.camera,
             initCamPos,
             45.0f,   // fov
             0.1f,    // near
             1000.0f, // far
-            10.0f,   // speed
+            100.0f,   // speed
             0.1f);   // sense
   
     // Initialise the voxel renderer.
@@ -229,34 +229,44 @@ void cgl_move_camera(float timeStep) {
     cam_move(&s_aData.camera, camMove, timeStep);
 }
 
-void generate_chunks() {
-    const int numChunks = 8;
-    const static float terrainHeight = 0.0f;
-    for (int x = 0; x < numChunks; x++) {
-        for (int y = 0; y < numChunks; y++) {
-            for (int z = 0; z < numChunks; z++) {
-                Chunk* chunk = &s_aData.chunks[x][y][z];
-                chunk->x = (float) x;
-                chunk->y = (float) y;
-                chunk->z = (float) z;
-                for (size_t i = 0; i < BLOCKS_PER_CHUNK; i++) {
-                    float x = (chunk->x * CHUNK_W) + chunk_idx_to_x(i);
-                    float y = (chunk->y * CHUNK_H) + chunk_idx_to_y(i);
-                    float z = (chunk->z * CHUNK_D) + chunk_idx_to_z(i);
-                    float surfaceY = terrainHeight +
-                        (18.0f * perlin2d(x, z, 0.08f, 1));
-                    if (y < surfaceY) {
-                        chunk->blocks[i].type = 1;
-                    } else {
-                        chunk->blocks[i].type = 0;
-                    }
-                }
-            }
+void generate_chunk(Chunk* chunk, float chunkX, float chunkZ) {
+    const static float terrainHeight = 64.0f;
+
+    chunk->x = chunkX;
+    chunk->z = chunkZ;
+
+    for (size_t i = 0; i < VOX_PER_CHUNK; i++) {
+        float x = (chunkX * CHUNK_W) + chunk_idx_to_x(i);
+        float y = chunk_idx_to_y(i);
+        float z = (chunkZ * CHUNK_D) + chunk_idx_to_z(i);
+        float surfaceY = terrainHeight +
+            (3.0f * perlin2d(x, z, 0.04f, 1));
+        if (y < surfaceY) {
+            chunk->voxels[i].type = 1;
+        } else {
+            chunk->voxels[i].type = 0;
         }
     }
 }
 
+void generate_chunks() {
+    // Calculate player chunk.
+    float playerChunkX = floorf(s_aData.camera.position[0] / CHUNK_W);
+    float playerChunkZ = floorf(s_aData.camera.position[2] / CHUNK_D);
+
+    // Check if we're in a new chunk.
+    if (s_aData.chunks.x != playerChunkX ||
+            s_aData.chunks.z != playerChunkZ) {
+        generate_chunk(&s_aData.chunks, playerChunkX, playerChunkZ);
+    }
+
+}
+
 void cgl_run() {
+    // Init the test chunk.
+    s_aData.chunks.x = 100.0f;
+    s_aData.chunks.z = 100.0f;
+
     // Directional light.
     clmVec3 lightPos = { 250.0f, 200.0f, 250.0f };
 
@@ -265,8 +275,6 @@ void cgl_run() {
     VoxelTex voxTex;
     tex_init_atlas(&atlas, 256, 256, 16, 16);
     tex_create_voxel_tex(&voxTex, &atlas, 240, 242, 243);
-
-    generate_chunks();
 
     double lastTime = glfwGetTime();
     float reportFrameTimer = 0.0f;
@@ -292,6 +300,8 @@ void cgl_run() {
             running = false;
         }
 
+        generate_chunks();
+
         cgl_move_camera(timeStep);
 
         cgl_update_view();
@@ -312,13 +322,7 @@ void cgl_run() {
         clmVec3 voxPos  = { 0.0f, 0.0f, 0.0f };
 
         shader_use(s_aData.voxelShader);
-        for (int x = 0; x < 8; x++) {
-            for (int y = 0; y < 8; y++) {
-                for (int z = 0; z < 8; z++) {
-                    chunk_render(&s_aData.chunks[x][y][z]);
-                }
-            }
-        }
+        chunk_render(&s_aData.chunks);
 
         // Rotating light.
         shader_use(s_aData.lightShader);

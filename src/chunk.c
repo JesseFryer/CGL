@@ -25,14 +25,13 @@ void chunk_render(Chunk* chunk) {
 
     // Determine bottom left coordinates of chunk.
     float chunkX = chunk->x * CHUNK_W; 
-    float chunkY = chunk->y * CHUNK_H;
     float chunkZ = chunk->z * CHUNK_D;
 
-    for (size_t i = 0; i < BLOCKS_PER_CHUNK; i++) {
+    for (size_t i = 0; i < VOX_PER_CHUNK; i++) {
         // Infer position of voxel.
-        if (chunk->blocks[i].type) {
+        if (chunk->voxels[i].type) {
             position[0] = chunkX + chunk_idx_to_x(i);
-            position[1] = chunkY + chunk_idx_to_y(i);
+            position[1] = chunk_idx_to_y(i);
             position[2] = chunkZ + chunk_idx_to_z(i);
             voxren_submit_vox(
                     position, 

@@ -8,20 +8,19 @@
 
 #include "types.h"
 
-#define CHUNK_W    8 // x
-#define CHUNK_H    8 // y
-#define CHUNK_D    8 // z
-#define BLOCKS_PER_CHUNK (CHUNK_W * CHUNK_H * CHUNK_D)
+#define CHUNK_W    16   // x
+#define CHUNK_H    64   // y
+#define CHUNK_D    16   // z
+#define VOX_PER_CHUNK (CHUNK_W * CHUNK_H * CHUNK_D)
 
 typedef struct {
     u8 type;
-} Block;
+} Voxel;
 
 typedef struct {
     float x;
-    float y;
     float z;
-    Block blocks[BLOCKS_PER_CHUNK];
+    Voxel voxels[VOX_PER_CHUNK];
 } Chunk;
 
 /* chunk_render
