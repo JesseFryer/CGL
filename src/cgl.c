@@ -156,7 +156,7 @@ AppData* cgl_init() {
             45.0f,   // fov
             0.1f,    // near
             1000.0f, // far
-            100.0f,   // speed
+            50.0f,   // speed
             0.1f);   // sense
   
     // Initialise the voxel renderer.
@@ -229,43 +229,34 @@ void cgl_move_camera(float timeStep) {
     cam_move(&s_aData.camera, camMove, timeStep);
 }
 
-void generate_chunk(Chunk* chunk, float chunkX, float chunkZ) {
-    const static float terrainHeight = 64.0f;
+void generate_chunks() {
+    // Calculate player chunk.
+    float playerChunkX = floorf(
+            s_aData.camera.position[0] / CHUNK_W);
+    float playerChunkZ = floorf(
+            s_aData.camera.position[2] / CHUNK_D);
 
-    chunk->x = chunkX;
-    chunk->z = chunkZ;
-
-    for (size_t i = 0; i < VOX_PER_CHUNK; i++) {
-        float x = (chunkX * CHUNK_W) + chunk_idx_to_x(i);
-        float y = chunk_idx_to_y(i);
-        float z = (chunkZ * CHUNK_D) + chunk_idx_to_z(i);
-        float surfaceY = terrainHeight +
-            (3.0f * perlin2d(x, z, 0.04f, 1));
-        if (y < surfaceY) {
-            chunk->voxels[i].type = 1;
-        } else {
-            chunk->voxels[i].type = 0;
+    // Check if chunk is in render region.
+    int chunkIndex = 0;
+    for (int x = 0; x < 4; x++) {
+        for (int z = 0; z < 4; z++) {
+            Chunk* chunk = &s_aData.chunks[chunkIndex++];
+            float chunkX = playerChunkX + x;
+            float chunkZ = playerChunkZ + z;
+            if (chunk->x != chunkX || 
+                    chunk->z != chunkZ) {
+                chunk_gen_chunk(chunk, chunkX, chunkZ);
+            }
         }
     }
 }
 
-void generate_chunks() {
-    // Calculate player chunk.
-    float playerChunkX = floorf(s_aData.camera.position[0] / CHUNK_W);
-    float playerChunkZ = floorf(s_aData.camera.position[2] / CHUNK_D);
-
-    // Check if we're in a new chunk.
-    if (s_aData.chunks.x != playerChunkX ||
-            s_aData.chunks.z != playerChunkZ) {
-        generate_chunk(&s_aData.chunks, playerChunkX, playerChunkZ);
-    }
-
-}
-
 void cgl_run() {
-    // Init the test chunk.
-    s_aData.chunks.x = 100.0f;
-    s_aData.chunks.z = 100.0f;
+    for (int i = 0; i < 16; i++) {
+        s_aData.chunks[i].x = -1.0f;
+        s_aData.chunks[i].z = -1.0f;
+    }
+    generate_chunks();
 
     // Directional light.
     clmVec3 lightPos = { 250.0f, 200.0f, 250.0f };
@@ -322,7 +313,10 @@ void cgl_run() {
         clmVec3 voxPos  = { 0.0f, 0.0f, 0.0f };
 
         shader_use(s_aData.voxelShader);
-        chunk_render(&s_aData.chunks);
+
+        for (int i = 0; i < 16; i++) {
+            chunk_render(&s_aData.chunks[i]);
+        }
 
         // Rotating light.
         shader_use(s_aData.lightShader);

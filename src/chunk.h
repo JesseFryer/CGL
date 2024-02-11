@@ -8,9 +8,9 @@
 
 #include "types.h"
 
-#define CHUNK_W    16   // x
-#define CHUNK_H    64   // y
-#define CHUNK_D    16   // z
+#define CHUNK_W    8  // x
+#define CHUNK_H    32 // y
+#define CHUNK_D    8  // z
 #define VOX_PER_CHUNK (CHUNK_W * CHUNK_H * CHUNK_D)
 
 typedef struct {
@@ -49,5 +49,20 @@ float chunk_idx_to_y(size_t idx);
  * coordinate.
  */
 float chunk_idx_to_z(size_t idx);
+
+/* chunk_gen_chunk
+ * ---------------
+ * Fill chunk with voxel information.
+ */
+void chunk_gen_chunk(
+        Chunk* chunk, 
+        float chunkX, 
+        float chunkZ);
+
+/* chunk_get_block
+ * ---------------
+ * Return the block type at the given position.
+ */
+u8 chunk_get_block(float x, float y, float z);
 
 #endif
