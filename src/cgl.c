@@ -149,7 +149,7 @@ AppData* cgl_init() {
     input_set_window(s_aData.window);
 
     // Initialise the camera.
-    clmVec3 initCamPos = { 0.0f, 132.0f, 0.0f };
+    clmVec3 initCamPos = { 0.0f, 20.0f, 0.0f };
     cam_init_camera(
             &s_aData.camera,
             initCamPos,
@@ -229,6 +229,9 @@ void cgl_move_camera(float timeStep) {
     cam_move(&s_aData.camera, camMove, timeStep);
 }
 
+void init_chunks() {
+}
+
 void generate_chunks() {
     // Calculate player chunk.
     float playerChunkX = floorf(
@@ -236,28 +239,60 @@ void generate_chunks() {
     float playerChunkZ = floorf(
             s_aData.camera.position[2] / CHUNK_D);
 
-    // Check if chunk is in render region.
-    int chunkIndex = 0;
-    for (int x = 0; x < 4; x++) {
-        for (int z = 0; z < 4; z++) {
-            Chunk* chunk = &s_aData.chunks[chunkIndex++];
-            float chunkX = playerChunkX + x;
-            float chunkZ = playerChunkZ + z;
-            if (chunk->x != chunkX || 
-                    chunk->z != chunkZ) {
-                chunk_gen_chunk(chunk, chunkX, chunkZ);
+    // Bottom left chunk of gen box.
+    float startChunkX = 
+        playerChunkX - (CHUNK_GEN_D * 0.5f);
+    float startChunkZ = 
+        playerChunkZ - (CHUNK_GEN_D * 0.5f);
+
+    // Loop through each chunk coord, if it's not already
+    // generated in chunks, find the first that is not
+    // in the gen box and overwrite it.
+    for (float x = 0; x < CHUNK_GEN_D; x++) {
+        for (float z = 0; z < CHUNK_GEN_D; z++) {
+            float chunkX = startChunkX + x;
+            float chunkZ = startChunkZ + z;
+
+            // Check if chunk has been generated already.
+            bool generated = false;
+            for (size_t i = 0; i < CHUNK_GEN_COUNT; i++) {
+                Chunk* chk = &s_aData.chunks[i];
+                if (chk->x == chunkX && 
+                        chk->z == chunkZ) {
+                    generated = true;
+                    break;
+                }
+            }
+
+            // Generate this chunk in the first slot which
+            // is not in the gen box.
+            if (!generated) {
+                float endChunkX = 
+                    startChunkX + CHUNK_GEN_D;
+                float endChunkZ = 
+                    startChunkZ + CHUNK_GEN_D;
+                for (size_t i = 0; 
+                        i < CHUNK_GEN_COUNT; i++) {
+                    // if the chunk is not in the gen box.
+                    Chunk* chk = &s_aData.chunks[i];
+                    if (chk->x < startChunkX ||
+                            chk->x >= endChunkX ||
+                            chk->z <  startChunkZ ||
+                            chk->z >= endChunkZ) {
+                        chunk_gen_chunk(
+                                chk,
+                                chunkX, 
+                                chunkZ);
+                        break;
+                    }
+
+                }
             }
         }
     }
 }
 
 void cgl_run() {
-    for (int i = 0; i < 16; i++) {
-        s_aData.chunks[i].x = -1.0f;
-        s_aData.chunks[i].z = -1.0f;
-    }
-    generate_chunks();
-
     // Directional light.
     clmVec3 lightPos = { 250.0f, 200.0f, 250.0f };
 
@@ -314,7 +349,7 @@ void cgl_run() {
 
         shader_use(s_aData.voxelShader);
 
-        for (int i = 0; i < 16; i++) {
+        for (int i = 0; i < CHUNK_GEN_COUNT; i++) {
             chunk_render(&s_aData.chunks[i]);
         }
 

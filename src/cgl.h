@@ -26,7 +26,7 @@ typedef struct {
     clmMat4 view;
     u32 voxelShader;
     u32 lightShader;
-    Chunk chunks[16];
+    Chunk chunks[CHUNK_GEN_COUNT];
     int winW;
     int winH;
 } AppData;

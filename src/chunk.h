@@ -9,9 +9,12 @@
 #include "types.h"
 
 #define CHUNK_W    8  // x
-#define CHUNK_H    32 // y
+#define CHUNK_H    8 // y
 #define CHUNK_D    8  // z
 #define VOX_PER_CHUNK (CHUNK_W * CHUNK_H * CHUNK_D)
+
+#define CHUNK_GEN_D 16 // Diameter.
+#define CHUNK_GEN_COUNT (CHUNK_GEN_D * CHUNK_GEN_D)
 
 typedef struct {
     u8 type;
