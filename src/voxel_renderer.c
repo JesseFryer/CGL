@@ -92,6 +92,9 @@ void voxren_init() {
             indices,
             GL_STATIC_DRAW);
 
+    // Render settings.
+
+
 }
 
 void voxren_submit_vox(

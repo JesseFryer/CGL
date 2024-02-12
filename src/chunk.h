@@ -53,6 +53,12 @@ float chunk_idx_to_y(size_t idx);
  */
 float chunk_idx_to_z(size_t idx);
 
+/* chunk_pos_to_idx
+ * --------------
+ * Convert chunk position to index in 1D array.
+ */
+size_t chunk_pos_to_idx(int x, int y, int z);
+
 /* chunk_gen_chunk
  * ---------------
  * Fill chunk with voxel information.

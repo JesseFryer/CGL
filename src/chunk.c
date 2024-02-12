@@ -29,17 +29,29 @@ void chunk_render(Chunk* chunk) {
     float chunkX = chunk->x * CHUNK_W; 
     float chunkZ = chunk->z * CHUNK_D;
 
-    for (size_t i = 0; i < VOX_PER_CHUNK; i++) {
-        // Infer position of voxel.
-        if (chunk->voxels[i].type) {
-            position[0] = chunkX + chunk_idx_to_x(i);
-            position[1] = chunk_idx_to_y(i);
-            position[2] = chunkZ + chunk_idx_to_z(i);
-            voxren_submit_vox(
-                    position, 
-                    size,
-                    colour,
-                    &tex);
+    for (int z = 0; z < CHUNK_D; z++) {
+        for (int y = 0; y < CHUNK_H; y++) {
+            for (int x = 0; x < CHUNK_W; x++) {
+                size_t idx = chunk_pos_to_idx(x, y, z);
+                Voxel* voxel = &chunk->voxels[idx];
+
+                // Skip air.
+                if (!voxel->type) {
+                    continue;
+                }
+
+                // Infer position of voxel.
+                position[0] = chunkX + x;
+                position[1] = y;
+                position[2] = chunkZ + z;
+
+                // Submit voxel.
+                voxren_submit_vox(
+                        position, 
+                        size,
+                        colour,
+                        &tex);
+            }
         }
     }
 
@@ -61,6 +73,10 @@ float chunk_idx_to_z(size_t idx) {
     return (float) ((idx / CHUNK_W) / CHUNK_H);
 }
 
+size_t chunk_pos_to_idx(int x, int y, int z) {
+    return (size_t) (z * CHUNK_W * CHUNK_H) + (y * CHUNK_W) + x;
+}
+
 void chunk_gen_chunk(
         Chunk* chunk, 
         float chunkX, 
@@ -76,7 +92,7 @@ void chunk_gen_chunk(
         float y = chunk_idx_to_y(i);
         float z = (chunkZ * CHUNK_D) + chunk_idx_to_z(i);
 
-        float var = 3.0f * perlin2d(x, z, 0.01f, 1);
+        float var = 2.0f * perlin2d(x, z, 0.02f, 1);
         float surfaceY = (CHUNK_H / 2) + var;
 
         // Set block type.
