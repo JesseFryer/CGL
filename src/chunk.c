@@ -202,7 +202,7 @@ void chunk_gen_chunk(
         float y = chunk_idx_to_y(i);
         float z = (chunkZ * CHUNK_D) + chunk_idx_to_z(i);
 
-        float var = 1.0f * perlin2d(x, z, 0.02f, 1);
+        float var = 7.0f * perlin2d(x, z, 0.05f, 1);
         float surfaceY = (CHUNK_H / 2) + var;
 
         // Set block type.
