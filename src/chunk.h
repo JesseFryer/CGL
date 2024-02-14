@@ -7,13 +7,15 @@
 #define _CHUNK_H
 
 #include "types.h"
+#include "clm.h"
+#include <stdbool.h>
 
 #define CHUNK_W    16  // x
-#define CHUNK_H    16 // y
+#define CHUNK_H    256   // y
 #define CHUNK_D    16  // z
 #define VOX_PER_CHUNK (CHUNK_W * CHUNK_H * CHUNK_D)
 
-#define CHUNK_GEN_D 8 // Diameter.
+#define CHUNK_GEN_D 24 // Diameter.
 #define CHUNK_GEN_COUNT (CHUNK_GEN_D * CHUNK_GEN_D)
 
 typedef struct {
@@ -21,9 +23,17 @@ typedef struct {
 } Voxel;
 
 typedef struct {
+    clmVec3 positions[VOX_PER_CHUNK];
+    clmVec3 sizes[VOX_PER_CHUNK];
+    u16 voxelCount;
+} Mesh;
+
+typedef struct {
     float x;
     float z;
     Voxel voxels[VOX_PER_CHUNK];
+    Mesh mesh;
+    bool meshed;
 } Chunk;
 
 /* chunk_render
@@ -67,6 +77,8 @@ void chunk_gen_chunk(
         Chunk* chunk, 
         float chunkX, 
         float chunkZ);
+
+void chunk_mesh_chunk(Chunk* chunk);
 
 /* chunk_get_block
  * ---------------

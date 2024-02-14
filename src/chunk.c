@@ -4,11 +4,12 @@
 #include "perlin.h"
 #include <stdio.h>
 #include <stdbool.h>
+#include <math.h>
 
 void chunk_render(Chunk* chunk) {
-    clmVec3 position;
-    clmVec3 size;
-    clmVec4 colour = { 1.0f, 1.0f, 1.0f, 1.0f };
+    if (!chunk->meshed) {
+        chunk_mesh_chunk(chunk);
+    }
 
     // TODO: Move atlas and Voxel tex stuff to cgl. 
     SpriteAtlas atlas;
@@ -26,14 +27,33 @@ void chunk_render(Chunk* chunk) {
             242,
             243);
 
+    clmVec4 colour = { 0.4f, 0.8f, 0.4f, 1.0f };
+
+    Mesh* mesh = &chunk->mesh;
+    for (int i = 0; i < mesh->voxelCount; i++) {
+        voxren_submit_vox(
+                mesh->positions[i],
+                mesh->sizes[i],
+                colour,
+                &tex);
+    }
+}
+
+void chunk_mesh_chunk(Chunk* chunk) {
     // Determine bottom left coordinates of chunk.
     float chunkX = chunk->x * CHUNK_W; 
     float chunkZ = chunk->z * CHUNK_D;
+
+    Mesh* mesh = &chunk->mesh;
+
+    clmVec3 size;
 
     // Greedy mesh this bihhhh.
     // Use this to keep track of which voxels have been 
     // meshed already.
     u8 meshedIndices[VOX_PER_CHUNK] = { 0 };
+
+    u16 voxCount = 0;
 
     for (int y = 0; y < CHUNK_H; y++) {
         for (int z = 0; z < CHUNK_D; z++) {
@@ -55,11 +75,10 @@ void chunk_render(Chunk* chunk) {
                     continue;
                 }
 
-                // Reset size from last mesh.
+                // Set initial size to one voxel.
                 size[0] = 1.0f;
                 size[1] = 1.0f;
                 size[2] = 1.0f;
-
 
                 // Greedy mesh.
                 //
@@ -151,21 +170,20 @@ void chunk_render(Chunk* chunk) {
                 // Send it to gpu.
                 
                 // Infer world position of voxel.
-                position[0] = chunkX + x + (size[0] * 0.5f);
-                position[1] = y - 1 + (size[1] * 0.5f);
-                position[2] = chunkZ + z + (size[2] * 0.5f);
-               
-                // Submit the voxel.
-                voxren_submit_vox(
-                        position,
-                        size,
-                        colour,
-                        &tex);
+                mesh->positions[voxCount][0] = chunkX + x + (size[0] * 0.5f);
+                mesh->positions[voxCount][1] = y - 1 + (size[1] * 0.5f);
+                mesh->positions[voxCount][2] = chunkZ + z + (size[2] * 0.5f);
+
+                mesh->sizes[voxCount][0] = size[0];
+                mesh->sizes[voxCount][1] = size[1];
+                mesh->sizes[voxCount][2] = size[2];
+
+                voxCount++;
             }
         }
     }
-
-    voxren_render_batch();
+    chunk->meshed = true;
+    mesh->voxelCount = voxCount;
 }
 
 float chunk_idx_to_x(size_t idx) {
@@ -202,8 +220,8 @@ void chunk_gen_chunk(
         float y = chunk_idx_to_y(i);
         float z = (chunkZ * CHUNK_D) + chunk_idx_to_z(i);
 
-        float var = 7.0f * perlin2d(x, z, 0.05f, 1);
-        float surfaceY = (CHUNK_H / 2) + var;
+        float var = abs(32.0f * perlin2d(x, z, 0.03, 1));
+        float surfaceY = var + 1;
 
         // Set block type.
         if (y < surfaceY) {

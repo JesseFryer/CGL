@@ -153,10 +153,10 @@ AppData* cgl_init() {
     cam_init_camera(
             &s_aData.camera,
             initCamPos,
-            45.0f,   // fov
+            PI / 2.0f,   // fov
             0.1f,    // near
             1000.0f, // far
-            50.0f,   // speed
+            4.3f,   // speed
             0.1f);   // sense
   
     // Initialise the voxel renderer.
@@ -283,6 +283,8 @@ void generate_chunks() {
                                 chk,
                                 chunkX, 
                                 chunkZ);
+                        chk->meshed = false;
+                        chk->mesh.voxelCount = 0;
                         break;
                     }
 
@@ -293,6 +295,13 @@ void generate_chunks() {
 }
 
 void cgl_run() {
+    // Set chunks super far away so they will regen at
+    // startup.
+    for (size_t i = 0; i < CHUNK_GEN_COUNT; i++) {
+        s_aData.chunks[i].x = 1000.0f;
+        s_aData.chunks[i].z = 1000.0f;
+    }
+
     // Directional light.
     clmVec3 lightPos = { 250.0f, 200.0f, 250.0f };
 

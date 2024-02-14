@@ -26,10 +26,11 @@ void main() {
     float specScalar = 0.5;
     vec3 viewDir = normalize(fCamPos - fPos);
     vec3 reflectDir = reflect(-diffuseDir, fNormal);
-    float specularStr = pow(max(dot(viewDir, reflectDir), 0.0), 128);
+    float specularStr = pow(max(dot(viewDir, reflectDir), 0.0), 2);
     vec3 specular = specScalar * specularStr * lightColour;
 
     vec4 colour = texture(uTextureAtlas, fTexCoord);
+    colour = vec4(fObjColour, 1.0f);
     fragColour = vec4((ambient + diffuse + specular), 1.0f) * colour;
 
     if (fragColour.a < 0.2) {
