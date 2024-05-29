@@ -1,5 +1,4 @@
 #include "camera.h"
-#include <stdio.h>
 #include <math.h>
 
 void front_vector(Camera* cam, clmVec3 front) {

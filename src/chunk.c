@@ -2,7 +2,6 @@
 #include "voxel_renderer.h"
 #include "clm.h"
 #include "perlin.h"
-#include <stdio.h>
 #include <stdbool.h>
 #include <math.h>
 
@@ -220,7 +219,7 @@ void chunk_gen_chunk(
         float y = chunk_idx_to_y(i);
         float z = (chunkZ * CHUNK_D) + chunk_idx_to_z(i);
 
-        float var = abs(32.0f * perlin2d(x, z, 0.03, 1));
+        float var = fabs(32.0f * perlin2d(x, z, 0.03, 1));
         float surfaceY = var + 1;
 
         // Set block type.

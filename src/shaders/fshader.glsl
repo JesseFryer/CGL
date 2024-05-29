@@ -26,7 +26,7 @@ void main() {
     float specScalar = 0.5;
     vec3 viewDir = normalize(fCamPos - fPos);
     vec3 reflectDir = reflect(-diffuseDir, fNormal);
-    float specularStr = pow(max(dot(viewDir, reflectDir), 0.0), 2);
+    float specularStr = pow(max(dot(viewDir, reflectDir), 0.0), 32);
     vec3 specular = specScalar * specularStr * lightColour;
 
     vec4 colour = texture(uTextureAtlas, fTexCoord);

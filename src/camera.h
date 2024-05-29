@@ -3,7 +3,7 @@
 
 #include "clm.h"
 
-typedef struct Camera {
+typedef struct {
     // View matrix things.
     clmVec3 position;
     clmVec3 up;
